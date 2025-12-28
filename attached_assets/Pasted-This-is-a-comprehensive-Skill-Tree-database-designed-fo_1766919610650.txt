@@ -1,0 +1,167 @@
+This is a comprehensive "Skill Tree" database designed for your System. To reach the scale of 200+ potential skills, I have categorized them into Class Trees.
+
+Each tree has an "Evolution Path" (Labels as they grow) and a list of Active Skills (actions you do) and Passive Skills (knowledge you accumulate).
+
+1. The Engineering Authority (INT + SEN)
+Focus: Electrical Engineering, Automation, Physics, Project Relay
+
+Class Evolution: Novice Tinkerer → Apprentice Technician → Electrical Engineer → Systems Architect → Iron Monarch
+
+Skillset Database:
+
+Core Engineering:
+
+Circuit Analysis: KVL/KCL mastery, Nodal analysis.
+
+Electronics: Soldering (Through-hole/SMD), PCB Design (KiCad/Eagle), Multimeter/Oscilloscope usage.
+
+Power Systems: Load calculation, Battery chemistry (Li-ion vs NiMH - Project Relay), Transformer logic.
+
+Calculus: Derivatives, Integrals, Differential Equations (modeling decay/growth).
+
+Automation & Code:
+
+Embedded Systems: Arduino/ESP32 programming, Sensor integration (Temp, IR, Ultrasonic).
+
+Software: Python (Data scripting), C++ (Hardware control), MATLAB/Simulink.
+
+Productivity Automation: Zapier logic, Google Sheets formulas, API integration.
+
+Design & Fabrication:
+
+CAD: AutoCAD (2D Schematics), Fusion 360 (3D Housing design).
+
+Prototyping: 3D Printing, Laser cutting, Breadboarding.
+
+2. The Sovereign Leader (CHA + INT)
+Focus: Ministry, Vitarise Initiative, Campus Management
+
+Class Evolution: Volunteer → Squad Leader → Event Coordinator → Community Director → Grand Marshall
+
+Skillset Database:
+
+Command & Strategy:
+
+Public Speaking: Sermon delivery, Pitching ideas, Voice projection.
+
+Project Management: Gantt charts, Agile/Scrum workflows, Delegation effectiveness.
+
+Event Logistics: Venue coordination, Risk assessment, Run-of-show creation (Vitarise).
+
+Crisis Management: Decision making under pressure, Conflict resolution.
+
+People Operations:
+
+Discipleship: One-on-one mentoring, Active listening, Empathetic counseling.
+
+Team Building: Identifying talent, Morale boosting, Feedback delivery.
+
+Networking: Cold emailing, Partnership negotiation, Social engineering.
+
+Financial Command:
+
+Budgeting: Expense tracking, ROI calculation, Fundraising strategy.
+
+3. The Creative Architect (SEN + AGI)
+Focus: Visual Arts, UI/UX, Marketing
+
+Class Evolution: Doodler → Designer → Art Director → Visionary → Architect of Illusions
+
+Skillset Database:
+
+Visual Design:
+
+Graphic Design: Typography, Color Theory, Logo creation (Canva/Photoshop).
+
+UI/UX: Wireframing (Figma), User empathy mapping (Project Relay), Interaction design.
+
+Illustration: Sketching, Character design (Mascot "Zeni"), Perspective drawing.
+
+Media Production:
+
+Video Editing: Scriptwriting, Timeline cutting (Premiere/CapCut), Color grading.
+
+Photography: Composition (Rule of thirds), Lighting exposure, Photo editing.
+
+Content Strategy: Copywriting, Social media analytics, Brand storytelling.
+
+4. The Harmonic Virtuoso (SEN + DEX)
+Focus: Music, Audio Engineering, Worship
+
+Class Evolution: Listener → Performer → Composer → Maestro → Resonant Sovereign
+
+Skillset Database:
+
+Performance:
+
+Instrument Mastery: Scales/Modes, Chord inversions, Fingerstyle (Guitar/Piano).
+
+Vocals: Pitch control, Breath support, Harmony blending.
+
+Improvisation: Jamming, Ear training (identifying intervals), Transposing on the fly.
+
+Technical Audio:
+
+Live Sound: EQ balancing, Compression, Cable management (XLR/TRS).
+
+Production: DAW proficiency (Logic/Ableton), MIDI sequencing, Mixing/Mastering.
+
+Theory:
+
+Composition: Song structure (Verse-Chorus), Melody writing, Sheet music reading.
+
+5. The Apex Predator (STR + VIT)
+Focus: Physicality, Discipline, "Manhood"
+
+Class Evolution: Civilian → Fighter → Warrior → Champion → Apex Predator
+
+Skillset Database:
+
+Physique:
+
+Calisthenics: Push-up variations, Pull-ups, Planche progression.
+
+Endurance: 5k/10k pacing, Breathing techniques (Box breathing), Sprint mechanics.
+
+Recovery: Mobility work, Stretching routines, Sleep hygiene optimization.
+
+Survival & Practicality:
+
+Domestic Mastery: Cooking (Nutrition macros), Clothing repair, Deep cleaning.
+
+Maintenance: Basic electrical repair (home), Car maintenance (oil/tire change).
+
+Defense: Situational awareness, Basic grappling/striking, De-escalation.
+
+Mental Fortress:
+
+Stoicism: Emotional regulation, Journaling/Reflection, Meditation.
+
+How to Implement "Evolution" in Your Code
+To make the labels change automatically as you grow, you can add a simple logic check in your JavaScript.
+
+Example Logic:
+
+If INT > 50 AND Engineering_XP > 100 → Change Class to "Electrical Engineer".
+
+If STR > 100 AND Pushups > 5000 → Change Title to "Iron Body".
+
+Code Snippet to Add to Your System:
+
+JavaScript
+
+function checkEvolution() {
+    const int = playerStats.INT;
+    const str = playerStats.STR;
+    
+    let jobTitle = "Student"; // Default
+
+    // Engineering Path
+    if (int > 20) jobTitle = "Novice Tinkerer";
+    if (int > 50) jobTitle = "Apprentice Technician";
+    if (int > 100 && playerStats.SEN > 80) jobTitle = "Electrical Engineer";
+    if (int > 300) jobTitle = "Systems Architect";
+
+    // Update UI
+    document.getElementById('jobTitle').innerText = jobTitle;
+}
