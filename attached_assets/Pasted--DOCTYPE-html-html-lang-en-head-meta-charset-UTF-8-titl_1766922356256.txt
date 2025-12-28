@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Kaizen System Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root{
+  --bg:#050505;
+  --panel:#0b0c15;
+  --red:#FF1D1D;
+  --text:#FFFFFF;
+  --blue:#D0E6FF;
+}
+
+*{box-sizing:border-box;font-family:Orbitron,monospace}
+
+body{
+  margin:0;
+  background:radial-gradient(circle at top,#0b1025,#050505);
+  color:var(--text);
+}
+
+.container{
+  padding:16px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:16px;
+}
+
+.panel{
+  background:rgba(11,12,21,.9);
+  border:1px solid var(--red);
+  border-radius:12px;
+  padding:14px;
+  box-shadow:inset 0 0 18px rgba(255,29,29,.2);
+}
+
+h2,h3{
+  margin:0 0 8px;
+  color:var(--red);
+  text-shadow:0 0 8px rgba(255,29,29,.8);
+}
+
+.stat-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin:6px 0;
+}
+
+input[type=range]{
+  width:60%;
+}
+
+button{
+  background:#000;
+  border:1px solid var(--red);
+  color:var(--red);
+  padding:6px 10px;
+  cursor:pointer;
+}
+button:hover{
+  background:var(--red);
+  color:#000;
+}
+
+.log{
+  background:#000;
+  border:1px solid var(--red);
+  height:160px;
+  overflow:auto;
+  padding:6px;
+  font-size:12px;
+}
+
+small{opacity:.7}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- PROFILE -->
+<div class="panel">
+  <h2>STATUS</h2>
+  <div>Name <input id="name" value="Kaizen Akagami"></div>
+  <div>Job <input id="job" value="Builder"></div>
+  <div>Title <input id="title" value="Unawakened"></div>
+  <div>Level: <span id="level">1</span></div>
+</div>
+
+<!-- KAIZEN HEXAGON -->
+<div class="panel">
+  <h2>KAIZEN’S HEXAGON</h2>
+  <canvas id="hexChart"></canvas>
+
+  <div class="stat-row">STR <input type="range" min="1" max="100" value="50" oninput="setHex('STR',this.value)"></div>
+  <div class="stat-row">INT <input type="range" min="1" max="100" value="50" oninput="setHex('INT',this.value)"></div>
+  <div class="stat-row">SPI <input type="range" min="1" max="100" value="50" oninput="setHex('SPI',this.value)"></div>
+  <div class="stat-row">VIT <input type="range" min="1" max="100" value="50" oninput="setHex('VIT',this.value)"></div>
+  <div class="stat-row">WIS <input type="range" min="1" max="100" value="50" oninput="setHex('WIS',this.value)"></div>
+  <div class="stat-row">DIS <input type="range" min="1" max="100" value="50" oninput="setHex('DIS',this.value)"></div>
+</div>
+
+<!-- DAILY QUEST -->
+<div class="panel">
+  <h2>DAILY QUESTS</h2>
+  <p>Quota: <b>5 / 8</b></p>
+
+  <h3>FIXED</h3>
+  <ul id="fixed"></ul>
+
+  <h3>RANDOM</h3>
+  <ul id="random"></ul>
+
+  <button onclick="claim()">CLAIM REWARD</button>
+  <div>FTP: <span id="ftp">0</span></div>
+</div>
+
+<!-- ARMORY -->
+<div class="panel">
+  <h2>ARMORY</h2>
+
+  <h3>Tier 1 – Equipped</h3>
+  <ul>
+    <li>Helmet of Salvation</li>
+    <li>Breastplate of Righteousness</li>
+    <li>Belt of Truth</li>
+    <li>Sandals of Peace</li>
+    <li>Shield of Faith</li>
+    <li>Sword of the Spirit</li>
+  </ul>
+
+  <h3>Tier 2 – Locked</h3>
+  <ul>
+    <li>🔒 Mantle of the Watchman</li>
+    <li>🔒 Gauntlets of the Diligent</li>
+  </ul>
+</div>
+
+<!-- SYSTEM LOG -->
+<div class="panel">
+  <h2>SYSTEM LOG</h2>
+  <div class="log" id="log"></div>
+</div>
+
+</div>
+
+<script>
+// ---------------- SYSTEM CORE ----------------
+const hexStats={STR:50,INT:50,SPI:50,VIT:50,WIS:50,DIS:50};
+let FTP=0;
+let completed=new Set();
+
+function log(msg){
+  const l=document.getElementById("log");
+  l.innerHTML+=`<div>[SYSTEM] ${msg}</div>`;
+  l.scrollTop=l.scrollHeight;
+}
+
+// ---------------- HEX CHART ----------------
+const chart=new Chart(document.getElementById("hexChart"),{
+  type:"radar",
+  data:{
+    labels:Object.keys(hexStats),
+    datasets:[{
+      data:Object.values(hexStats),
+      borderColor:"#FF1D1D",
+      backgroundColor:"rgba(255,29,29,.3)",
+      pointBackgroundColor:"#FFF"
+    }]
+  },
+  options:{scales:{r:{min:0,max:100}},plugins:{legend:{display:false}}}
+});
+
+function setHex(stat,val){
+  hexStats[stat]=Number(val);
+  chart.data.datasets[0].data=Object.values(hexStats);
+  chart.update();
+  updateLevel();
+  log(`${stat} recalibrated → ${val}`);
+}
+
+function updateLevel(){
+  const lvl=Math.floor(Object.values(hexStats).reduce((a,b)=>a+b,0)/60);
+  document.getElementById("level").innerText=lvl;
+}
+
+// ---------------- QUESTS ----------------
+const fixedTasks=[
+  "Deep Work (7 Flows)",
+  "Physical Training",
+  "Eat 4 Meals",
+  "Read 5 Chapters",
+  "Spiritual Bread"
+];
+
+const randomPool=[
+  "Clean Workspace",
+  "Engineering Flashcards",
+  "Meditation / Prayer",
+  "Educational Podcast",
+  "Drink 3L Water"
+];
+
+function render(){
+  const f=document.getElementById("fixed");
+  const r=document.getElementById("random");
+  f.innerHTML=""; r.innerHTML="";
+  fixedTasks.forEach(t=>{
+    f.innerHTML+=`<li><input type="checkbox" onchange="toggle('${t}')"> ${t}</li>`;
+  });
+  shuffle([...randomPool]).slice(0,3).forEach(t=>{
+    r.innerHTML+=`<li><input type="checkbox" onchange="toggle('${t}')"> ${t}</li>`;
+  });
+}
+
+function toggle(t){
+  completed.has(t)?completed.delete(t):completed.add(t);
+}
+
+function claim(){
+  if(completed.size<5){
+    log("Reward denied. Quota not met.");
+    return;
+  }
+  FTP+=10;
+  document.getElementById("ftp").innerText=FTP;
+  completed.clear();
+  render();
+  log("Daily Complete → +10 FTP");
+}
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+render();
+log("System Initialized.");
+</script>
+
+</body>
+</html>
