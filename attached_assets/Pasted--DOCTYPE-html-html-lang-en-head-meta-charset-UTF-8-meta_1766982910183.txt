@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Life Operating System — Shadow Monarch</title>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root {
+  --bg-dark: #050505;
+  --bg-blue: #0b0c15;
+  --cyan: #00e5ff;
+  --red: #ff3333;
+  --gold: #ffd166;
+  --panel: rgba(255,255,255,0.06);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Roboto Mono', monospace;
+  background: linear-gradient(180deg, var(--bg-dark), var(--bg-blue));
+  color: #e6f7ff;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr 1fr;
+  gap: 12px;
+  padding: 12px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--cyan);
+  box-shadow: 0 0 12px rgba(0,229,255,0.15);
+  padding: 12px;
+  border-radius: 8px;
+}
+
+h2 {
+  margin: 0 0 8px;
+  color: var(--cyan);
+  text-shadow: 0 0 6px var(--cyan);
+}
+
+label { font-size: 12px; opacity: 0.8; }
+
+input[type="text"], input[type="range"] {
+  width: 100%;
+}
+
+.bar {
+  height: 10px;
+  background: #222;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.fill {
+  height: 100%;
+  transition: width 0.3s;
+}
+
+button {
+  background: transparent;
+  border: 1px solid var(--cyan);
+  color: var(--cyan);
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 4px 0;
+}
+
+.log {
+  height: 120px;
+  overflow-y: auto;
+  font-size: 12px;
+  background: #000;
+  padding: 6px;
+  border: 1px solid var(--cyan);
+}
+
+.log div { margin-bottom: 4px; }
+
+@media (max-width: 900px) {
+  .container { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- LEFT: PROFILE -->
+<div class="panel">
+  <h2>STATUS</h2>
+
+  <label>Name</label>
+  <input type="text" id="name" value="Player">
+
+  <p>Job: <span id="job">Electrical Engineering Student</span></p>
+  <p>Title: <span id="title">Unawakened</span></p>
+  <p>Level: <span id="level">1</span></p>
+
+  <label>HP (Energy)</label>
+  <input type="range" min="0" max="100" id="hp">
+  <div class="bar"><div id="hpFill" class="fill"></div></div>
+
+  <label>MP (Focus)</label>
+  <input type="range" min="0" max="100" id="mp">
+  <div class="bar"><div id="mpFill" class="fill"></div></div>
+</div>
+
+<!-- CENTER: CHARTS -->
+<div class="panel">
+  <h2>ATTRIBUTES</h2>
+  <canvas id="coreChart"></canvas>
+  <hr>
+  <canvas id="kaizenChart"></canvas>
+</div>
+
+<!-- RIGHT: STATS + QUESTS -->
+<div class="panel">
+  <h2>TRAINING</h2>
+  <div id="stats"></div>
+
+  <h2>DAILY QUEST</h2>
+  <div id="quest"></div>
+  <button id="claimReward" disabled>Claim Recovery</button>
+</div>
+
+</div>
+
+<div class="panel">
+  <h2>SYSTEM LOG</h2>
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+/* ========= STATE ========= */
+const state = {
+  core: { STR:10, AGI:10, INT:10, VIT:10, SEN:10 },
+  kaizen: { STR:50, INT:50, SPI:50, VIT:50, WIS:50, DIS:50 },
+  hp: 80,
+  mp: 80,
+  quest: { push:0, sit:0, squat:0, run:0 }
+};
+
+/* ========= LOG ========= */
+function log(msg, color="cyan") {
+  const l = document.getElementById("log");
+  const d = document.createElement("div");
+  d.style.color = color;
+  d.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  l.appendChild(d);
+  l.scrollTop = l.scrollHeight;
+}
+
+/* ========= LEVEL ========= */
+function calcLevel() {
+  const coreTotal = Object.values(state.core).reduce((a,b)=>a+b,0);
+  const kaiTotal = Object.values(state.kaizen).reduce((a,b)=>a+b,0);
+  const lvl = Math.floor((coreTotal + kaiTotal)/10);
+  document.getElementById("level").textContent = lvl;
+}
+
+/* ========= EVOLUTION ========= */
+function checkTitle() {
+  let t = "Unawakened";
+  if (state.core.INT > 50 && state.core.SEN > 30) t = "Apprentice Technician";
+  if (state.core.INT > 100) t = "Electrical Engineer";
+  if (state.core.STR > 100 && state.core.VIT > 100) t = "Iron Monarch";
+  document.getElementById("title").textContent = t;
+}
+
+/* ========= BARS ========= */
+function updateBars() {
+  hpFill.style.width = state.hp+"%";
+  hpFill.style.background = state.hp < 30 ? "var(--red)" : "lime";
+  mpFill.style.width = state.mp+"%";
+  mpFill.style.background = "var(--cyan)";
+}
+
+/* ========= CORE STATS UI ========= */
+const statsDiv = document.getElementById("stats");
+function renderStats() {
+  statsDiv.innerHTML = "";
+  for (let s in state.core) {
+    const row = document.createElement("div");
+    row.className = "stat-row";
+    row.innerHTML = `
+      <span>${s}: ${state.core[s]}</span>
+      <button>+1</button>
+    `;
+    row.querySelector("button").onclick = () => {
+      if (state.core[s] >= 500) {
+        log(`${s} at cap`, "red");
+        return;
+      }
+      state.core[s]++;
+      coreChart.update();
+      calcLevel();
+      checkTitle();
+      renderStats();
+      log(`${s} increased by 1`, "lime");
+    };
+    statsDiv.appendChild(row);
+  }
+}
+
+/* ========= QUEST ========= */
+const questDiv = document.getElementById("quest");
+function renderQuest() {
+  questDiv.innerHTML = "";
+  const q = state.quest;
+  for (let k in q) {
+    const row = document.createElement("div");
+    row.className = "stat-row";
+    row.innerHTML = `
+      <span>${k.toUpperCase()}: ${q[k]}</span>
+      <button>+10</button>
+    `;
+    row.querySelector("button").onclick = () => {
+      q[k] = Math.min(q[k]+10, k==="run"?10:100);
+      renderQuest();
+      checkQuest();
+      log(`${k} progress updated`);
+    };
+    questDiv.appendChild(row);
+  }
+}
+function checkQuest() {
+  const done = Object.values(state.quest).every(v => v >= 100 || v === 10);
+  document.getElementById("claimReward").disabled = !done;
+}
+document.getElementById("claimReward").onclick = () => {
+  state.hp = 100;
+  state.mp = 100;
+  for (let s in state.core) state.core[s]+=2;
+  state.quest = { push:0, sit:0, squat:0, run:0 };
+  updateBars();
+  renderStats();
+  renderQuest();
+  calcLevel();
+  log("STATUS RECOVERY COMPLETE", "gold");
+};
+
+/* ========= CHARTS ========= */
+const coreChart = new Chart(document.getElementById("coreChart"), {
+  type: "radar",
+  data: {
+    labels: Object.keys(state.core),
+    datasets: [{
+      data: Object.values(state.core),
+      borderColor: "#00e5ff",
+      backgroundColor: "rgba(0,229,255,0.2)"
+    }]
+  },
+  options: { scales:{ r:{ min:0, max:500 } } }
+});
+
+const kaizenChart = new Chart(document.getElementById("kaizenChart"), {
+  type: "radar",
+  data: {
+    labels: Object.keys(state.kaizen),
+    datasets: [{
+      data: Object.values(state.kaizen),
+      borderColor: "#ffd166",
+      backgroundColor: "rgba(255,209,102,0.2)"
+    }]
+  },
+  options: { scales:{ r:{ min:0, max:100 } } }
+});
+
+/* ========= INIT ========= */
+hp.oninput = e => { state.hp = e.target.value; updateBars(); };
+mp.oninput = e => { state.mp = e.target.value; updateBars(); };
+
+renderStats();
+renderQuest();
+calcLevel();
+updateBars();
+log("SYSTEM INITIALIZED", "cyan");
+</script>
+
+</body>
+</html>
+
+

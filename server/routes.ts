@@ -48,7 +48,11 @@ export async function registerRoutes(
         userId,
         intelligence: 10, strength: 10, charisma: 10,
         sense: 10, agility: 10, vitality: 10,
-        currentTitle: "Student",
+        kaizenStr: 50, kaizenInt: 50, kaizenSpi: 50,
+        kaizenVit: 50, kaizenWis: 50, kaizenDis: 50,
+        hp: 100, mp: 100,
+        questProgress: { push: 0, sit: 0, squat: 0, run: 0 },
+        currentTitle: "Unawakened",
         currentClass: "Civilian",
         bio: "Ready to evolve.",
       });
@@ -113,6 +117,58 @@ export async function registerRoutes(
     // In a real app, check stat requirements here
     const unlocked = await storage.unlockSkill(userId, skillId);
     res.json(unlocked);
+  });
+
+  // LOS Endpoints
+  app.post(api.profile.incrementStat.path, async (req: any, res) => {
+    if (!req.isAuthenticated()) return res.status(401).send();
+    const userId = req.user.claims.sub;
+    const stat = req.params.stat;
+
+    try {
+      const updated = await storage.incrementStat(userId, stat);
+      res.json(updated);
+    } catch (err: any) {
+      res.status(400).json({ message: err.message });
+    }
+  });
+
+  app.patch(api.profile.updateHpMp.path, async (req: any, res) => {
+    if (!req.isAuthenticated()) return res.status(401).send();
+    const userId = req.user.claims.sub;
+
+    try {
+      const { hp, mp } = api.profile.updateHpMp.input.parse(req.body);
+      const updated = await storage.updateHpMp(userId, hp, mp);
+      res.json(updated);
+    } catch (err: any) {
+      res.status(400).json({ message: err.message });
+    }
+  });
+
+  app.patch(api.profile.updateQuest.path, async (req: any, res) => {
+    if (!req.isAuthenticated()) return res.status(401).send();
+    const userId = req.user.claims.sub;
+    const quest = req.params.quest;
+
+    try {
+      const updated = await storage.updateQuest(userId, quest);
+      res.json(updated);
+    } catch (err: any) {
+      res.status(400).json({ message: err.message });
+    }
+  });
+
+  app.post(api.profile.claimRecovery.path, async (req: any, res) => {
+    if (!req.isAuthenticated()) return res.status(401).send();
+    const userId = req.user.claims.sub;
+
+    try {
+      const updated = await storage.claimRecovery(userId);
+      res.json(updated);
+    } catch (err: any) {
+      res.status(400).json({ message: err.message });
+    }
   });
 
   // Seed Data

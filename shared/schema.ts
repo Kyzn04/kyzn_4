@@ -11,15 +11,27 @@ export * from "./models/auth";
 export const profiles = pgTable("profiles", {
   id: serial("id").primaryKey(),
   userId: text("user_id").notNull().references(() => users.id),
-  // Stats
+  // Core Stats (base foundation, 0-500 scale)
   intelligence: integer("intelligence").default(10).notNull(), // INT
   strength: integer("strength").default(10).notNull(), // STR
   charisma: integer("charisma").default(10).notNull(), // CHA
   sense: integer("sense").default(10).notNull(), // SEN
   agility: integer("agility").default(10).notNull(), // AGI
   vitality: integer("vitality").default(10).notNull(), // VIT
+  // Kaizen Stats (0-100 scale)
+  kaizenStr: integer("kaizen_str").default(50).notNull(),
+  kaizenInt: integer("kaizen_int").default(50).notNull(),
+  kaizenSpi: integer("kaizen_spi").default(50).notNull(),
+  kaizenVit: integer("kaizen_vit").default(50).notNull(),
+  kaizenWis: integer("kaizen_wis").default(50).notNull(),
+  kaizenDis: integer("kaizen_dis").default(50).notNull(),
+  // HP/MP (Energy and Focus)
+  hp: integer("hp").default(100).notNull(),
+  mp: integer("mp").default(100).notNull(),
+  // Quest Progress
+  questProgress: jsonb("quest_progress").default({ push: 0, sit: 0, squat: 0, run: 0 }).notNull(),
   // Meta
-  currentTitle: text("current_title").default("Novice").notNull(),
+  currentTitle: text("current_title").default("Unawakened").notNull(),
   currentClass: text("current_class").default("Civilian").notNull(),
   bio: text("bio"),
   lastEvolutionCheck: timestamp("last_evolution_check").defaultNow(),

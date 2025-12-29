@@ -65,6 +65,70 @@ export class DatabaseStorage implements IStorage {
     const [skill] = await db.select().from(skills).where(eq(skills.name, name));
     return skill;
   }
+
+  async incrementStat(userId: string, stat: string): Promise<Profile> {
+    const profile = await this.getProfile(userId);
+    if (!profile) throw new Error("Profile not found");
+    
+    const statMap: Record<string, keyof Profile> = {
+      'str': 'strength',
+      'agi': 'agility',
+      'int': 'intelligence',
+      'vit': 'vitality',
+      'sen': 'sense',
+      'cha': 'charisma',
+    };
+    
+    const statKey = statMap[stat.toLowerCase()];
+    if (!statKey) throw new Error("Invalid stat");
+    
+    const currentValue = profile[statKey] as number;
+    if (currentValue >= 500) throw new Error("Stat at cap");
+    
+    const updated = await this.updateProfile(userId, {
+      [statKey]: currentValue + 1
+    });
+    return updated;
+  }
+
+  async updateHpMp(userId: string, hp?: number, mp?: number): Promise<Profile> {
+    const updates: any = {};
+    if (hp !== undefined) updates.hp = Math.min(100, Math.max(0, hp));
+    if (mp !== undefined) updates.mp = Math.min(100, Math.max(0, mp));
+    
+    const updated = await this.updateProfile(userId, updates);
+    return updated;
+  }
+
+  async updateQuest(userId: string, quest: string): Promise<Profile> {
+    const profile = await this.getProfile(userId);
+    if (!profile) throw new Error("Profile not found");
+    
+    const questMap: any = profile.questProgress as Record<string, number>;
+    const maxValue = quest === 'run' ? 10 : 100;
+    questMap[quest] = Math.min(maxValue, (questMap[quest] || 0) + 10);
+    
+    const updated = await this.updateProfile(userId, { questProgress: questMap });
+    return updated;
+  }
+
+  async claimRecovery(userId: string): Promise<Profile> {
+    const profile = await this.getProfile(userId);
+    if (!profile) throw new Error("Profile not found");
+    
+    const updated = await this.updateProfile(userId, {
+      hp: 100,
+      mp: 100,
+      strength: profile.strength + 2,
+      agility: profile.agility + 2,
+      intelligence: profile.intelligence + 2,
+      vitality: profile.vitality + 2,
+      sense: profile.sense + 2,
+      charisma: profile.charisma + 2,
+      questProgress: { push: 0, sit: 0, squat: 0, run: 0 }
+    });
+    return updated;
+  }
 }
 
 export const storage = new DatabaseStorage();

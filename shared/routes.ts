@@ -33,6 +33,36 @@ export const api = {
         400: errorSchemas.validation,
       },
     },
+    incrementStat: {
+      method: 'POST' as const,
+      path: '/api/profile/stat/:stat',
+      responses: {
+        200: z.custom<typeof profiles.$inferSelect>(),
+        400: errorSchemas.validation,
+      },
+    },
+    updateHpMp: {
+      method: 'PATCH' as const,
+      path: '/api/profile/hpmp',
+      input: z.object({ hp: z.number().optional(), mp: z.number().optional() }),
+      responses: {
+        200: z.custom<typeof profiles.$inferSelect>(),
+      },
+    },
+    updateQuest: {
+      method: 'PATCH' as const,
+      path: '/api/profile/quest/:quest',
+      responses: {
+        200: z.custom<typeof profiles.$inferSelect>(),
+      },
+    },
+    claimRecovery: {
+      method: 'POST' as const,
+      path: '/api/profile/claim-recovery',
+      responses: {
+        200: z.custom<typeof profiles.$inferSelect>(),
+      },
+    },
   },
   skills: {
     list: {
