@@ -115,9 +115,17 @@ export class DatabaseStorage implements IStorage {
     const profile = await this.getProfile(userId);
     if (!profile) throw new Error("Profile not found");
     
-    const questMap: any = profile.questProgress as Record<string, number>;
-    const maxValue = quest === 'run' ? 10 : 100;
-    questMap[quest] = Math.min(maxValue, (questMap[quest] || 0) + 10);
+    const questMax: Record<string, number> = {
+      push: 35,
+      sit: 35,
+      squat: 30,
+      plank: 3,
+      bible: 3,
+      book: 5
+    };
+    
+    const maxValue = questMax[quest] || 100;
+    questMap[quest] = Math.min(maxValue, (questMap[quest] || 0) + 1);
     
     const updated = await this.updateProfile(userId, { questProgress: questMap });
     return updated;
@@ -136,7 +144,7 @@ export class DatabaseStorage implements IStorage {
       vitality: profile.vitality + 2,
       sense: profile.sense + 2,
       charisma: profile.charisma + 2,
-      questProgress: { push: 0, sit: 0, squat: 0, run: 0 }
+      questProgress: { push: 0, sit: 0, squat: 0, plank: 0, bible: 0, book: 0 }
     });
     return updated;
   }

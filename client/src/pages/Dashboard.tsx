@@ -99,10 +99,12 @@ export default function Dashboard() {
 
   const questProgress = profile.questProgress as any;
   const isQuestComplete = 
-    questProgress.push >= 100 && 
-    questProgress.sit >= 100 && 
-    questProgress.squat >= 100 && 
-    questProgress.run >= 10;
+    questProgress.push >= 35 && 
+    questProgress.sit >= 35 && 
+    questProgress.squat >= 30 && 
+    questProgress.plank >= 3 &&
+    questProgress.bible >= 3 &&
+    questProgress.book >= 5;
 
   return (
     <Layout>
@@ -202,13 +204,23 @@ export default function Dashboard() {
               </div>
 
               <div className="space-y-6 max-w-md mx-auto">
-                <QuestRow label="Push-ups" current={questProgress.push} target={100} onPlus={() => updateQuestMutation.mutate("push")} />
-                <QuestRow label="Sit-ups" current={questProgress.sit} target={100} onPlus={() => updateQuestMutation.mutate("sit")} />
-                <QuestRow label="Squats" current={questProgress.squat} target={100} onPlus={() => updateQuestMutation.mutate("squat")} />
-                <QuestRow label="Running" current={questProgress.run} target={10} unit="km" onPlus={() => updateQuestMutation.mutate("run")} />
+                <QuestRow label="Push-ups" current={questProgress.push} target={35} onPlus={() => updateQuestMutation.mutate("push")} />
+                <QuestRow label="Sit-ups" current={questProgress.sit} target={35} onPlus={() => updateQuestMutation.mutate("sit")} />
+                <QuestRow label="Squats" current={questProgress.squat} target={30} onPlus={() => updateQuestMutation.mutate("squat")} />
+                <QuestRow label="1min Plank" current={questProgress.plank} target={3} unit="x" onPlus={() => updateQuestMutation.mutate("plank")} />
+                <QuestRow label="Bible" current={questProgress.bible} target={3} unit=" chapters" onPlus={() => updateQuestMutation.mutate("bible")} />
+                <QuestRow label="Book" current={questProgress.book} target={5} unit=" pages" onPlus={() => updateQuestMutation.mutate("book")} />
               </div>
 
               <div className="mt-12 text-center space-y-8">
+                <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-lg">
+                  <p className="text-[10px] font-mono text-red-500 uppercase mb-2 tracking-widest">Active Penalties</p>
+                  <ul className="text-xs font-mono text-red-400/80 space-y-1">
+                    <li>• +10 PUSH UPS NEXT DAY</li>
+                    <li>• PAY FOR A FRIEND'S MEAL</li>
+                    <li>• NO REWARDS IN A COMPLETED DAY</li>
+                  </ul>
+                </div>
                 <p className="text-xs font-mono text-white/60">
                   WARNING: Failure to complete the daily quest will result in an appropriate <span className="text-red-500 font-bold">penalty</span>.
                 </p>

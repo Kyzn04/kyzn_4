@@ -6,47 +6,58 @@ import {
   PolarRadiusAxis, 
   ResponsiveContainer 
 } from 'recharts';
-import { type Profile } from "@shared/schema";
 
 interface StatRadarProps {
-  stats: Profile;
+  stats: any;
+  max?: number;
 }
 
-export function StatRadar({ stats }: StatRadarProps) {
-  const data = [
-    { subject: 'INT', A: stats.intelligence, fullMark: 100 },
-    { subject: 'STR', A: stats.strength, fullMark: 100 },
-    { subject: 'CHA', A: stats.charisma, fullMark: 100 },
-    { subject: 'SEN', A: stats.sense, fullMark: 100 },
-    { subject: 'AGI', A: stats.agility, fullMark: 100 },
-    { subject: 'VIT', A: stats.vitality, fullMark: 100 },
+export function StatRadar({ stats, max = 500 }: StatRadarProps) {
+  // Determine if this is Core or Kaizen based on keys
+  const isKaizen = 'spi' in stats || 'wis' in stats;
+  
+  const data = isKaizen ? [
+    { subject: 'STR', A: stats.str, fullMark: 100 },
+    { subject: 'INT', A: stats.int, fullMark: 100 },
+    { subject: 'SPI', A: stats.spi, fullMark: 100 },
+    { subject: 'VIT', A: stats.vit, fullMark: 100 },
+    { subject: 'WIS', A: stats.wis, fullMark: 100 },
+    { subject: 'DIS', A: stats.dis, fullMark: 100 },
+  ] : [
+    { subject: 'STR', A: stats.str, fullMark: 500 },
+    { subject: 'AGI', A: stats.agi, fullMark: 500 },
+    { subject: 'VIT', A: stats.vit, fullMark: 500 },
+    { subject: 'INT', A: stats.int, fullMark: 500 },
+    { subject: 'SEN', A: stats.sen, fullMark: 500 },
+    { subject: 'CHA', A: stats.cha, fullMark: 500 },
   ];
+
+  const currentMax = isKaizen ? 100 : 500;
 
   return (
     <div className="w-full h-[300px] relative">
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart cx="50%" cy="50%" outerRadius="70%" data={data}>
-          <PolarGrid stroke="var(--border)" strokeDasharray="3 3" />
+          <PolarGrid stroke="rgba(0, 229, 255, 0.2)" strokeDasharray="3 3" />
           <PolarAngleAxis 
             dataKey="subject" 
-            tick={{ fill: 'var(--foreground)', fontFamily: 'var(--font-display)', fontSize: 12, fontWeight: 700 }} 
+            tick={{ fill: 'rgba(0, 229, 255, 0.8)', fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 700 }} 
           />
-          <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
+          <PolarRadiusAxis angle={30} domain={[0, currentMax]} tick={false} axisLine={false} />
           <Radar
             name="Stats"
             dataKey="A"
-            stroke="var(--primary)"
-            strokeWidth={3}
-            fill="var(--primary)"
-            fillOpacity={0.2}
+            stroke="rgba(0, 229, 255, 1)"
+            strokeWidth={2}
+            fill="rgba(0, 229, 255, 1)"
+            fillOpacity={0.3}
           />
         </RadarChart>
       </ResponsiveContainer>
       
-      {/* Decorative overlays */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none flex items-center justify-center">
-        <div className="w-[140%] h-[1px] bg-primary/10 rotate-45 absolute" />
-        <div className="w-[140%] h-[1px] bg-primary/10 -rotate-45 absolute" />
+      {/* Decorative hexagonal border overlay */}
+      <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+        <div className="w-48 h-48 border border-cyan-500/10 rounded-full animate-pulse" />
       </div>
     </div>
   );

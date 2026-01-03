@@ -29,7 +29,14 @@ export const profiles = pgTable("profiles", {
   hp: integer("hp").default(100).notNull(),
   mp: integer("mp").default(100).notNull(),
   // Quest Progress
-  questProgress: jsonb("quest_progress").default({ push: 0, sit: 0, squat: 0, run: 0 }).notNull(),
+  questProgress: jsonb("quest_progress").default({ 
+    push: 0, 
+    sit: 0, 
+    squat: 0, 
+    plank: 0, 
+    bible: 0, 
+    book: 0 
+  }).notNull(),
   // Meta
   currentTitle: text("current_title").default("Unawakened").notNull(),
   currentClass: text("current_class").default("Civilian").notNull(),
