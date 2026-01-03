@@ -79,7 +79,7 @@ export default function Dashboard() {
     );
   }
 
-  const kaizenData = {
+  const kaizenData: any = {
     str: profile.kaizenStr,
     int: profile.kaizenInt,
     spi: profile.kaizenSpi,
@@ -88,7 +88,7 @@ export default function Dashboard() {
     dis: profile.kaizenDis
   };
 
-  const coreData = {
+  const coreData: any = {
     str: profile.strength,
     agi: profile.agility,
     int: profile.intelligence,
@@ -97,11 +97,12 @@ export default function Dashboard() {
     cha: profile.charisma
   };
 
+  const questProgress = profile.questProgress as any;
   const isQuestComplete = 
-    profile.questProgress.push >= 100 && 
-    profile.questProgress.sit >= 100 && 
-    profile.questProgress.squat >= 100 && 
-    profile.questProgress.run >= 10;
+    questProgress.push >= 100 && 
+    questProgress.sit >= 100 && 
+    questProgress.squat >= 100 && 
+    questProgress.run >= 10;
 
   return (
     <Layout>
@@ -175,14 +176,14 @@ export default function Dashboard() {
           {/* Kaizen Hexagon */}
           <CyberCard title="KAIZEN HEXAGON (1-100)" variant="neon">
             <div className="space-y-6">
-              <StatRadar stats={kaizenData} max={100} />
+              <StatRadar stats={kaizenData} />
               <div className="space-y-4">
-                <KaizenSlider label="STR" value={profile.kaizenStr} onChange={(v) => updateKaizenMutation.mutate({ kaizenStr: v[0] })} />
-                <KaizenSlider label="INT" value={profile.kaizenInt} onChange={(v) => updateKaizenMutation.mutate({ kaizenInt: v[0] })} />
-                <KaizenSlider label="SPI" value={profile.kaizenSpi} onChange={(v) => updateKaizenMutation.mutate({ kaizenSpi: v[0] })} />
-                <KaizenSlider label="VIT" value={profile.kaizenVit} onChange={(v) => updateKaizenMutation.mutate({ kaizenVit: v[0] })} />
-                <KaizenSlider label="WIS" value={profile.kaizenWis} onChange={(v) => updateKaizenMutation.mutate({ kaizenWis: v[0] })} />
-                <KaizenSlider label="DIS" value={profile.kaizenDis} onChange={(v) => updateKaizenMutation.mutate({ kaizenDis: v[0] })} />
+                <KaizenSlider label="STR" value={profile.kaizenStr} onChange={(v: number[]) => updateKaizenMutation.mutate({ kaizenStr: v[0] })} />
+                <KaizenSlider label="INT" value={profile.kaizenInt} onChange={(v: number[]) => updateKaizenMutation.mutate({ kaizenInt: v[0] })} />
+                <KaizenSlider label="SPI" value={profile.kaizenSpi} onChange={(v: number[]) => updateKaizenMutation.mutate({ kaizenSpi: v[0] })} />
+                <KaizenSlider label="VIT" value={profile.kaizenVit} onChange={(v: number[]) => updateKaizenMutation.mutate({ kaizenVit: v[0] })} />
+                <KaizenSlider label="WIS" value={profile.kaizenWis} onChange={(v: number[]) => updateKaizenMutation.mutate({ kaizenWis: v[0] })} />
+                <KaizenSlider label="DIS" value={profile.kaizenDis} onChange={(v: number[]) => updateKaizenMutation.mutate({ kaizenDis: v[0] })} />
               </div>
             </div>
           </CyberCard>
@@ -201,10 +202,10 @@ export default function Dashboard() {
               </div>
 
               <div className="space-y-6 max-w-md mx-auto">
-                <QuestRow label="Push-ups" current={profile.questProgress.push} target={100} onPlus={() => updateQuestMutation.mutate("push")} />
-                <QuestRow label="Sit-ups" current={profile.questProgress.sit} target={100} onPlus={() => updateQuestMutation.mutate("sit")} />
-                <QuestRow label="Squats" current={profile.questProgress.squat} target={100} onPlus={() => updateQuestMutation.mutate("squat")} />
-                <QuestRow label="Running" current={profile.questProgress.run} target={10} unit="km" onPlus={() => updateQuestMutation.mutate("run")} />
+                <QuestRow label="Push-ups" current={questProgress.push} target={100} onPlus={() => updateQuestMutation.mutate("push")} />
+                <QuestRow label="Sit-ups" current={questProgress.sit} target={100} onPlus={() => updateQuestMutation.mutate("sit")} />
+                <QuestRow label="Squats" current={questProgress.squat} target={100} onPlus={() => updateQuestMutation.mutate("squat")} />
+                <QuestRow label="Running" current={questProgress.run} target={10} unit="km" onPlus={() => updateQuestMutation.mutate("run")} />
               </div>
 
               <div className="mt-12 text-center space-y-8">

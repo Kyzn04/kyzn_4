@@ -70,15 +70,14 @@ export async function registerRoutes(
       if (!currentProfile) return res.status(404).send();
 
       // Merge stats for evolution check
-      const merged = { ...currentProfile, ...input };
+      const merged = { ...currentProfile, ...input } as any;
       const evolution = calculateEvolution(merged);
 
       const updated = await storage.updateProfile(userId, {
         ...input,
         currentTitle: evolution.title,
         currentClass: evolution.cls,
-        lastEvolutionCheck: new Date(),
-      });
+      } as any);
       res.json(updated);
     } catch (err) {
       if (err instanceof z.ZodError) {
