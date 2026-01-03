@@ -1,0 +1,110 @@
+You are a senior frontend engineer and UI/UX designer building a “Solo Leveling” inspired productivity app. Create the Identity Screen for the Identity tab of the app. This screen represents the user’s Hunter Profile and must feel like an in-universe system interface (clean, futuristic, blue holographic HUD).
+
+Core Objective
+Recreate the attached reference image as the Identity Screen UI, but:
+
+Convert all text to English
+
+Replace fictional or inconsistent labels with clean, logical, game-system-appropriate terminology
+
+Ensure all displayed data makes sense for an Identity/Profile tab (not inventory or quest logs)
+
+Layout Structure
+
+1. Header Section (Profile Overview)
+
+Character Portrait on the left (square or hexagonal frame, glowing blue outline)
+
+On the right:
+
+Name: (dynamic username)
+
+Hunter ID: (unique alphanumeric ID)
+
+Rank: (E → S → National)
+
+Guild: (or “None” if unaffiliated)
+
+Horizontal HP Bar and MP Bar beneath the name
+
+Animated fill
+
+Subtle glow
+
+Numeric values optional (toggle-ready)
+
+2. Core Stats Panel
+Label this section: ATTRIBUTES
+
+Each stat should show:
+
+Base Value
+
+Bonus Value (from equipment or passives)
+
+Final Value
+
+Stats to include:
+
+Strength
+
+Agility
+
+Vitality
+
+Intelligence
+
+Perception
+
+Mana
+
+Bonus values should appear in a lighter or neon accent color.
+
+3. Equipment Influence (Read-Only)
+Under Attributes, show a compact section:
+EQUIPMENT EFFECTS
+
+Ring: +Strength
+
+Bracelet: +Mana
+
+Armor: +Defense
+
+This is informational only—no equipment swapping here.
+
+4. Abilities Section
+Label this section: SKILLS & TRAITS
+
+Each entry must show:
+
+Rank Badge (F, E, D, C, B, A, S)
+
+Type (Active / Passive / Hidden)
+
+Skill Name
+
+Subtle divider lines between skills
+
+Example entries:
+
+F-Rank | Active — Resource Collection
+
+Hidden Passive — Latent Awakening
+
+S-Rank | Active — King’s Lightning
+
+S-Rank | Active — Monarch’s Tempest
+
+S-Rank | Passive — Evolution Authority
+
+Hidden skills should appear dimmed or partially obscured until unlocked.
+
+Visual & Interaction Rules
+
+Color Theme: Blue / Cyan / Neon Teal on dark background
+
+Font Style: Clean sci-fi sans-serif (system-like)
+
+UI Feel: Holographic, sharp edges, glowing borders
+
+No clutter, no cartoon UI
