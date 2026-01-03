@@ -179,50 +179,49 @@ export default function ProfilePage() {
               </div>
             </CyberCard>
 
-            <CyberCard title="PERSONAL DATA">
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="currentClass"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-display">ASSIGNED CLASS</FormLabel>
-                        <FormControl>
-                          <Input {...field} className="bg-background/50" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="currentTitle"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="font-display">RANK TITLE</FormLabel>
-                        <FormControl>
-                          <Input {...field} className="bg-background/50" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <CyberCard title="CHARACTER IDENTITY" variant="neon">
+              <div className="flex flex-col md:flex-row gap-8 items-start">
+                <div className="relative group">
+                  <div className="w-32 h-32 rounded bg-primary/10 border border-primary/30 overflow-hidden relative">
+                    <img src="/kyzn-avatar.png" alt="KYZN Avatar" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+                    <div className="absolute inset-0 bg-primary/10 mix-blend-overlay" />
+                  </div>
+                  <div className="absolute -bottom-2 -right-2 bg-primary text-black text-[10px] font-bold px-2 py-0.5 rounded rotate-3 shadow-lg">
+                    VERIFIED
+                  </div>
                 </div>
-                
-                <FormField
-                  control={form.control}
-                  name="bio"
-                  render={({ field }) => (
+
+                <div className="flex-1 w-full space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="currentClass"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="font-display text-xs text-muted-foreground uppercase tracking-widest">Job Class (Semi-Editable)</FormLabel>
+                          <FormControl>
+                            <Input {...field} className="bg-background/50 border-primary/20 font-mono" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
                     <FormItem>
-                      <FormLabel className="font-display">BIOMETRIC LOG (BIO)</FormLabel>
+                      <FormLabel className="font-display text-xs text-muted-foreground uppercase tracking-widest">Rank Title (System Locked)</FormLabel>
                       <FormControl>
-                        <Textarea {...field} className="bg-background/50 min-h-[120px]" placeholder="Enter operational history..." />
+                        <Input value={profile?.currentTitle} disabled className="bg-background/20 border-white/5 font-mono text-primary shadow-inner opacity-80 cursor-not-allowed" />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
-                  )}
-                />
+                  </div>
+
+                  <div className="p-4 bg-muted/20 border border-border/50 rounded-sm relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-2 opacity-10">
+                      <Terminal size={40} />
+                    </div>
+                    <div className="text-[10px] font-mono text-muted-foreground mb-1 uppercase tracking-tighter">System Level</div>
+                    <div className="text-4xl font-display font-black text-white">LVL. {Math.floor(((profile?.strength || 0) + (profile?.intelligence || 0) + (profile?.vitality || 0)) / 10)}</div>
+                  </div>
+                </div>
               </div>
             </CyberCard>
 

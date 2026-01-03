@@ -34,8 +34,19 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateProfile(userId: string, updates: UpdateProfileRequest): Promise<Profile> {
+    const [profile] = await db.select().from(profiles).where(eq(profiles.userId, userId));
+    if (!profile) throw new Error("Profile not found");
+
+    // Evolution Logic
+    let evolvedTitle = profile.currentTitle;
+    const finalStats = { ...profile, ...updates };
+    
+    if (finalStats.intelligence > 100) evolvedTitle = "Electrical Engineer";
+    else if (finalStats.intelligence > 50 && (finalStats.sense || 0) > 30) evolvedTitle = "Apprentice Technician";
+    else if (finalStats.strength > 100 && (finalStats.vitality || 0) > 100) evolvedTitle = "Iron Monarch";
+    
     const [updated] = await db.update(profiles)
-      .set(updates)
+      .set({ ...updates, currentTitle: evolvedTitle })
       .where(eq(profiles.userId, userId))
       .returning();
     return updated;

@@ -29,7 +29,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <div className="md:hidden flex items-center justify-between p-4 border-b border-border bg-card/50 backdrop-blur-md sticky top-0 z-50">
         <div className="flex items-center gap-2">
           <Cpu className="text-primary w-8 h-8" />
-          <span className="font-display font-bold text-lg tracking-widest text-glow">SKILL_OS</span>
+          <span className="font-display font-bold text-lg tracking-widest text-glow">KYZN</span>
         </div>
         <button onClick={() => setIsMobileOpen(!isMobileOpen)} className="p-2 text-primary">
           {isMobileOpen ? <X /> : <Menu />}
@@ -43,7 +43,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       )}>
         <div className="p-8 hidden md:flex items-center gap-3">
           <Cpu className="text-primary w-8 h-8 animate-pulse" />
-          <h1 className="font-display font-bold text-2xl tracking-widest text-glow">SKILL_OS</h1>
+          <h1 className="font-display font-bold text-2xl tracking-widest text-glow">KYZN</h1>
         </div>
 
         <div className="px-4 py-2 mb-6">

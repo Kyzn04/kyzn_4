@@ -1,75 +1,120 @@
 import { CyberButton } from "@/components/ui/CyberButton";
-import { Cpu, Terminal } from "lucide-react";
+import { Terminal, ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Landing() {
-  const [text, setText] = useState("");
-  const fullText = "INITIALIZING SKILL_OS v2.0...";
+  const [phase, setPhase] = useState<"initial" | "activating" | "access">("initial");
+  const [messages, setMessages] = useState<string[]>([]);
+  
+  const systemLogs = [
+    "SYSTEM ONLINE...",
+    "USER IDENTIFIED...",
+    "SCANNING BIOMETRIC DATA...",
+    "PREPARING K.A.I.Z.E.N INTERFACE...",
+    "ACCESS GRANTED."
+  ];
 
   useEffect(() => {
-    let i = 0;
-    const interval = setInterval(() => {
-      setText(fullText.slice(0, i));
-      i++;
-      if (i > fullText.length) clearInterval(interval);
-    }, 50);
-    return () => clearInterval(interval);
-  }, []);
+    if (phase === "activating") {
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < systemLogs.length) {
+          setMessages(prev => [...prev, systemLogs[i]]);
+          i++;
+        } else {
+          clearInterval(interval);
+          setTimeout(() => setPhase("access"), 1000);
+        }
+      }, 800);
+      return () => clearInterval(interval);
+    }
+  }, [phase]);
 
   const handleLogin = () => {
+    setPhase("activating");
+  };
+
+  const finalizeLogin = () => {
     window.location.href = "/api/login";
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center relative overflow-hidden">
-      {/* Background Grid Animation */}
-      <div className="absolute inset-0 z-0 opacity-20" 
-           style={{ 
-             backgroundImage: "linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px)", 
-             backgroundSize: "30px 30px",
-             transform: "perspective(500px) rotateX(60deg) translateY(-100px) scale(2)"
-           }} 
-      />
-
-      <div className="relative z-10 max-w-2xl w-full px-4 text-center space-y-12">
-        <div className="space-y-6">
-          <div className="inline-flex p-4 rounded-full bg-primary/10 border border-primary/50 shadow-[0_0_30px_rgba(0,255,255,0.3)] animate-pulse">
-            <Cpu className="w-16 h-16 text-primary" />
-          </div>
-          
-          <h1 className="text-6xl md:text-8xl font-display font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white to-white/50 drop-shadow-[0_0_10px_rgba(0,255,255,0.5)]">
-            SKILL_OS
-          </h1>
-          
-          <div className="h-6 font-mono text-primary/80 tracking-widest text-sm md:text-base">
-            <span className="mr-2">root@system:~#</span>
-            {text}
-            <span className="animate-pulse">_</span>
-          </div>
-        </div>
-
-        <div className="p-8 border border-border/50 bg-card/80 backdrop-blur-md rounded-lg max-w-md mx-auto relative group">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-secondary/10 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-lg pointer-events-none" />
-          
-          <p className="text-muted-foreground mb-8 font-mono text-sm leading-relaxed">
-            Gamify your existence. Track stats, unlock skills, and evolve your real-life character profile.
-          </p>
-
-          <CyberButton size="lg" className="w-full" onClick={handleLogin}>
-            <Terminal className="w-5 h-5 mr-2" />
-            CONNECT TO SYSTEM
-          </CyberButton>
-          
-          <div className="mt-6 flex justify-center gap-4 text-[10px] font-mono text-muted-foreground uppercase">
-            <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-green-500" /> Secure</span>
-            <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-primary" /> Encrypted</span>
-            <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-secondary" /> v2.0.4</span>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center relative overflow-hidden font-mono">
+      {/* Background Ambience */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,229,255,0.05)_0%,transparent_70%)]" />
       
-      {/* Decorative footer elements */}
-      <div className="absolute bottom-0 w-full h-32 bg-gradient-to-t from-background to-transparent pointer-events-none" />
+      <AnimatePresence mode="wait">
+        {phase === "initial" && (
+          <motion.div 
+            key="initial"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.1 }}
+            className="relative z-10 text-center space-y-8"
+          >
+            <div className="relative inline-block">
+              <motion.div 
+                animate={{ rotate: 360 }}
+                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                className="absolute inset-0 border-2 border-primary/20 rounded-full"
+              />
+              <div className="p-8 rounded-full border border-primary/50 bg-primary/5 shadow-[0_0_50px_rgba(0,229,255,0.2)]">
+                <ShieldCheck className="w-20 h-20 text-primary" />
+              </div>
+            </div>
+
+            <h1 className="text-7xl font-display font-black tracking-[0.2em] text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]">
+              KYZN
+            </h1>
+
+            <CyberButton size="lg" variant="primary" onClick={handleLogin} className="w-64">
+              ACTIVATE SYSTEM
+            </CyberButton>
+          </motion.div>
+        )}
+
+        {phase === "activating" && (
+          <motion.div 
+            key="activating"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="relative z-10 w-full max-w-md p-6 border border-primary/30 bg-black/80 backdrop-blur-md"
+          >
+            <div className="space-y-4">
+              {messages.map((msg, i) => (
+                <motion.div 
+                  key={i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  className="text-primary text-sm flex items-center gap-2"
+                >
+                  <span className="w-1 h-1 bg-primary rounded-full animate-pulse" />
+                  {msg}
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {phase === "access" && (
+          <motion.div 
+            key="access"
+            initial={{ opacity: 0, scale: 1.2 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="relative z-10 text-center"
+          >
+            <div className="text-primary text-xl tracking-[0.5em] mb-8 animate-pulse">SYSTEM READY</div>
+            <CyberButton size="lg" variant="primary" onClick={finalizeLogin} className="w-64 border-white text-white hover:shadow-[0_0_30px_rgba(255,255,255,0.3)]">
+              ENTER GATE
+            </CyberButton>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Decorative Overlays */}
+      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-20" />
+      <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-20" />
     </div>
   );
 }
