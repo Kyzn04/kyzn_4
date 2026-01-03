@@ -93,7 +93,7 @@ export class DatabaseStorage implements IStorage {
     const statKey = statMap[stat.toLowerCase()];
     if (!statKey) throw new Error("Invalid stat");
     
-    const currentValue = profile[statKey] as number;
+    const currentValue = (profile[statKey] as number) || 0;
     if (currentValue >= 500) throw new Error("Stat at cap");
     
     const updated = await this.updateProfile(userId, {
@@ -115,6 +115,7 @@ export class DatabaseStorage implements IStorage {
     const profile = await this.getProfile(userId);
     if (!profile) throw new Error("Profile not found");
     
+    const questMap = { ...(profile.questProgress as Record<string, number>) };
     const questMax: Record<string, number> = {
       push: 35,
       sit: 35,
