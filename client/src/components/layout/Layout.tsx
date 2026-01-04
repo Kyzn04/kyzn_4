@@ -7,7 +7,9 @@ import {
   LogOut, 
   Cpu, 
   Menu,
-  X 
+  X,
+  Trophy,
+  Flame
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -20,6 +22,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
     { href: "/skills", label: "Skill Tree", icon: Network },
+    { href: "/discipline", label: "Discipline", icon: Flame },
+    { href: "/rewards", label: "Rewards", icon: Trophy },
     { href: "/profile", label: "Identity", icon: User },
   ];
 

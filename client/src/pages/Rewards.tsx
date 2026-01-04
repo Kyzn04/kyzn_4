@@ -107,7 +107,7 @@ function RewardCard({ title, description, icon, onClick, disabled }: any) {
           <p className="text-sm font-mono text-primary/60 mt-1">{description}</p>
         </div>
         <CyberButton 
-          variant="outline" 
+          variant="ghost" 
           className="w-full mt-4" 
           onClick={onClick}
           disabled={disabled}
