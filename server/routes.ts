@@ -149,9 +149,10 @@ export async function registerRoutes(
     if (!req.isAuthenticated()) return res.status(401).send();
     const userId = req.user.claims.sub;
     const quest = req.params.quest;
+    const mode = req.query.mode as "increment" | "complete" || "increment";
 
     try {
-      const updated = await storage.updateQuest(userId, quest);
+      const updated = await storage.updateQuest(userId, quest, mode);
       
       // Auto-redirect logic check (optional: could also be handled on frontend)
       res.json(updated);

@@ -36,7 +36,7 @@ export const profiles = pgTable("profiles", {
   rewardClaimedToday: boolean("reward_claimed_today").default(false).notNull(),
   // Quest Progress
   questProgress: jsonb("quest_progress").default({ 
-    flow1: 0, flow2: 0, flow3: 0, flow4: 0, flow5: 0, flow6: 0, flow7: 0,
+    flow: 0,
     push: 0, 
     sit: 0, 
     squat: 0 

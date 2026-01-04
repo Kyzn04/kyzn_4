@@ -4,7 +4,7 @@ import { CyberCard } from "@/components/ui/CyberCard";
 import { StatRadar } from "@/components/dashboard/StatRadar";
 import { CyberButton } from "@/components/ui/CyberButton";
 import { Link, useLocation } from "wouter";
-import { Activity, Zap, Shield, Brain, Trophy, Loader2, Plus, CheckCircle2, Info, Flame, AlertTriangle } from "lucide-react";
+import { Activity, Zap, Shield, Brain, Trophy, Loader2, Plus, CheckCircle2, Info, Flame, AlertTriangle, FastForward } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Slider } from "@/components/ui/slider";
 import { useMutation } from "@tanstack/react-query";
@@ -37,8 +37,8 @@ export default function Dashboard() {
   });
 
   const updateQuestMutation = useMutation({
-    mutationFn: async (quest: string) => {
-      const res = await apiRequest("PATCH", `/api/profile/quest/${quest}`);
+    mutationFn: async ({ quest, mode }: { quest: string, mode?: "increment" | "complete" }) => {
+      const res = await apiRequest("PATCH", `/api/profile/quest/${quest}${mode ? `?mode=${mode}` : ''}`);
       return res.json();
     },
     onSuccess: () => {
@@ -57,9 +57,15 @@ export default function Dashboard() {
   });
 
   const questProgress = profile?.questProgress as any;
-  const completedCount = questProgress ? Object.values(questProgress).filter((v: any) => v >= 1).length : 0;
-  const isPerfect = completedCount === 10;
-  const isSafe = completedCount >= 6;
+  
+  const isPerfect = questProgress && 
+    questProgress.flow >= 7 && 
+    questProgress.push >= 35 && 
+    questProgress.sit >= 35 && 
+    questProgress.squat >= 30;
+    
+  const completedCount = questProgress ? Object.values(questProgress).filter((v: any) => typeof v === 'number' && v > 0).length : 0;
+  const isSafe = (questProgress?.flow || 0) >= 4 || completedCount >= 4;
 
   useEffect(() => {
     if (isPerfect && !profile?.rewardClaimedToday) {
@@ -163,7 +169,7 @@ export default function Dashboard() {
           {/* Daily Quest Section */}
           <CyberCard title="DAILY QUEST" variant="neon" className="relative">
             <div className="absolute top-4 right-4 text-cyan-500/50">
-              <span className="text-[10px] font-mono uppercase tracking-widest">{completedCount}/10 TASKS</span>
+              <span className="text-[10px] font-mono uppercase tracking-widest">{completedCount}/4 TASKS</span>
             </div>
             
             {!isSafe && (
@@ -171,7 +177,7 @@ export default function Dashboard() {
                 <AlertTriangle className="text-red-500 w-5 h-5" />
                 <div className="flex-1">
                   <p className="text-red-500 text-[10px] font-mono font-bold uppercase">Punishment State Active</p>
-                  <p className="text-red-400/60 text-[8px] font-mono">COMPLETE AT LEAST 6 TASKS TO AVOID PENALTY.</p>
+                  <p className="text-red-400/60 text-[8px] font-mono">COMPLETE AT LEAST 4 TASKS TO AVOID PENALTY.</p>
                 </div>
               </div>
             )}
@@ -183,36 +189,34 @@ export default function Dashboard() {
                   <span className="w-1 h-1 bg-red-500 rounded-full" /> MANDATORY PRIORITY: FLOW SESSIONS
                 </p>
                 <div className="grid grid-cols-1 gap-2">
-                  {[1, 2, 3, 4, 5, 6, 7].map(num => (
-                    <QuestRow 
-                      key={`flow${num}`}
-                      label={`Deep Work Flow session ${num}`} 
-                      current={questProgress[`flow${num}`]} 
-                      target={1} 
-                      onPlus={() => updateQuestMutation.mutate(`flow${num}`)} 
-                      priority
-                    />
-                  ))}
+                  <QuestRow 
+                    label="Deep Work Flow protocol" 
+                    current={questProgress?.flow || 0} 
+                    target={7} 
+                    onPlus={() => updateQuestMutation.mutate({ quest: "flow", mode: "increment" })} 
+                    onComplete={() => updateQuestMutation.mutate({ quest: "flow", mode: "complete" })}
+                    priority
+                  />
                 </div>
               </div>
 
-              {/* Physical/Spiritual Tasks */}
+              {/* Physical Tasks */}
               <div className="space-y-3 pt-4 border-t border-white/5">
                 <p className="text-[10px] font-mono text-cyan-500/80 uppercase tracking-widest">Secondary Objectives</p>
                 <div className="space-y-3">
-                  <QuestRow label="Push-ups (35 reps)" current={questProgress.push} target={35} onPlus={() => updateQuestMutation.mutate("push")} />
-                  <QuestRow label="Sit-ups (35 reps)" current={questProgress.sit} target={35} onPlus={() => updateQuestMutation.mutate("sit")} />
-                  <QuestRow label="Squats (30 reps)" current={questProgress.squat} target={30} onPlus={() => updateQuestMutation.mutate("squat")} />
+                  <QuestRow label="Push-ups (35 reps)" current={questProgress?.push || 0} target={35} onPlus={() => updateQuestMutation.mutate({ quest: "push", mode: "increment" })} onComplete={() => updateQuestMutation.mutate({ quest: "push", mode: "complete" })} />
+                  <QuestRow label="Sit-ups (35 reps)" current={questProgress?.sit || 0} target={35} onPlus={() => updateQuestMutation.mutate({ quest: "sit", mode: "increment" })} onComplete={() => updateQuestMutation.mutate({ quest: "sit", mode: "complete" })} />
+                  <QuestRow label="Squats (30 reps)" current={questProgress?.squat || 0} target={30} onPlus={() => updateQuestMutation.mutate({ quest: "squat", mode: "increment" })} onComplete={() => updateQuestMutation.mutate({ quest: "squat", mode: "complete" })} />
                 </div>
               </div>
 
               <div className="mt-8 pt-6 border-t border-white/5 text-center">
                 <div className="flex justify-center gap-4 mb-4">
                    <div className={`px-3 py-1 border text-[10px] font-mono ${isSafe ? 'border-green-500/50 text-green-500' : 'border-white/20 text-white/20'}`}>
-                     SAFE (6/10)
+                     SAFE
                    </div>
                    <div className={`px-3 py-1 border text-[10px] font-mono ${isPerfect ? 'border-yellow-500/50 text-yellow-500 animate-pulse' : 'border-white/20 text-white/20'}`}>
-                     REWARD (10/10)
+                     REWARD (100%)
                    </div>
                 </div>
                 <CyberButton 
@@ -249,26 +253,39 @@ function StatTrainer({ label, value, onIncrement, disabled }: any) {
   );
 }
 
-function QuestRow({ label, current, target, onPlus, unit = "", priority = false }: any) {
+function QuestRow({ label, current, target, onPlus, onComplete, priority = false }: any) {
   const isDone = current >= target;
   return (
     <div className={`flex items-center gap-4 group p-2 rounded transition-all ${priority ? 'bg-red-500/5 border border-red-500/10' : 'hover:bg-white/5'}`}>
       <span className={`flex-1 font-mono text-xs tracking-tight ${isDone ? 'text-white/40 line-through' : priority ? 'text-red-400 font-bold' : 'text-white/80'}`}>
-        {priority && <span className="text-[8px] bg-red-500 text-white px-1 mr-2 rounded">PRIORITY</span>}
+        {priority && <span className="text-[8px] bg-red-500 text-white px-1 mr-2 rounded uppercase tracking-tighter">Priority</span>}
         {label}
       </span>
       <span className={`font-mono text-xs ${isDone ? 'text-green-500' : priority ? 'text-red-400' : 'text-cyan-400/80'}`}>
-        [{current}/{target}{unit}]
+        [{current}/{target}]
       </span>
-      <button 
-        onClick={onPlus}
-        disabled={isDone}
-        className={`w-5 h-5 border flex items-center justify-center transition-all ${
-          isDone ? 'border-green-500 text-green-500 opacity-50' : priority ? 'border-red-500/40 text-red-500/40 hover:border-red-500 hover:text-red-500' : 'border-white/20 text-white/20 hover:border-cyan-500 hover:text-cyan-500'
-        }`}
-      >
-        {isDone ? <CheckCircle2 size={10} /> : <Plus size={10} />}
-      </button>
+      <div className="flex gap-1">
+        <button 
+          onClick={onPlus}
+          disabled={isDone}
+          title="Increment +1"
+          className={`w-5 h-5 border flex items-center justify-center transition-all ${
+            isDone ? 'border-green-500 text-green-500 opacity-50' : priority ? 'border-red-500/40 text-red-500/40 hover:border-red-500 hover:text-red-500' : 'border-white/20 text-white/20 hover:border-cyan-500 hover:text-cyan-500'
+          }`}
+        >
+          <Plus size={10} />
+        </button>
+        <button 
+          onClick={onComplete}
+          disabled={isDone}
+          title="Complete Task"
+          className={`w-5 h-5 border flex items-center justify-center transition-all ${
+            isDone ? 'border-green-500 text-green-500 opacity-50' : priority ? 'border-red-500/40 text-red-500/40 hover:border-red-500 hover:text-red-500' : 'border-white/20 text-white/20 hover:border-cyan-500 hover:text-cyan-500'
+          }`}
+        >
+          {isDone ? <CheckCircle2 size={10} /> : <FastForward size={10} />}
+        </button>
+      </div>
     </div>
   );
 }

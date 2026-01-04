@@ -111,13 +111,13 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
-  async updateQuest(userId: string, quest: string): Promise<Profile> {
+  async updateQuest(userId: string, quest: string, mode: "increment" | "complete" = "increment"): Promise<Profile> {
     const profile = await this.getProfile(userId);
     if (!profile) throw new Error("Profile not found");
     
     const questMap = { ...(profile.questProgress as Record<string, number>) };
     const questMax: Record<string, number> = {
-      flow1: 1, flow2: 1, flow3: 1, flow4: 1, flow5: 1, flow6: 1, flow7: 1,
+      flow: 7,
       push: 35,
       sit: 35,
       squat: 30
@@ -126,7 +126,11 @@ export class DatabaseStorage implements IStorage {
     if (!(quest in questMax)) throw new Error("INVALID QUEST TYPE");
 
     const maxValue = questMax[quest];
-    questMap[quest] = Math.min(maxValue, (questMap[quest] || 0) + 1);
+    if (mode === "complete") {
+      questMap[quest] = maxValue;
+    } else {
+      questMap[quest] = Math.min(maxValue, (questMap[quest] || 0) + 1);
+    }
     
     const updated = await this.updateProfile(userId, { questProgress: questMap });
     return updated;
@@ -146,7 +150,7 @@ export class DatabaseStorage implements IStorage {
       sense: profile.sense + 2,
       charisma: profile.charisma + 2,
       questProgress: { 
-        flow1: 0, flow2: 0, flow3: 0, flow4: 0, flow5: 0, flow6: 0, flow7: 0,
+        flow: 0,
         push: 0, sit: 0, squat: 0 
       },
       rewardClaimedToday: false
