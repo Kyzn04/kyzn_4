@@ -152,6 +152,21 @@ export async function registerRoutes(
 
     try {
       const updated = await storage.updateQuest(userId, quest);
+      
+      // Auto-redirect logic check (optional: could also be handled on frontend)
+      res.json(updated);
+    } catch (err: any) {
+      res.status(400).json({ message: err.message });
+    }
+  });
+
+  app.post("/api/profile/claim-reward", async (req: any, res) => {
+    if (!req.isAuthenticated()) return res.status(401).send();
+    const userId = req.user.claims.sub;
+    const { type } = req.body;
+
+    try {
+      const updated = await storage.claimReward(userId, type);
       res.json(updated);
     } catch (err: any) {
       res.status(400).json({ message: err.message });

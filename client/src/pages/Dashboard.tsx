@@ -3,16 +3,18 @@ import { Layout } from "@/components/layout/Layout";
 import { CyberCard } from "@/components/ui/CyberCard";
 import { StatRadar } from "@/components/dashboard/StatRadar";
 import { CyberButton } from "@/components/ui/CyberButton";
-import { Link } from "wouter";
-import { Activity, Zap, Shield, Brain, Trophy, Loader2, Plus, CheckCircle2, Info } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { Activity, Zap, Shield, Brain, Trophy, Loader2, Plus, CheckCircle2, Info, Flame, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Slider } from "@/components/ui/slider";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useEffect } from "react";
 
 export default function Dashboard() {
   const { profile, isLoading } = useProfile();
   const { user } = useAuth();
+  const [, setLocation] = useLocation();
 
   const incrementMutation = useMutation({
     mutationFn: async (stat: string) => {
@@ -53,6 +55,17 @@ export default function Dashboard() {
       queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
     }
   });
+
+  const questProgress = profile?.questProgress as any;
+  const completedCount = questProgress ? Object.values(questProgress).filter((v: any) => v >= 1).length : 0;
+  const isPerfect = completedCount === 10;
+  const isSafe = completedCount >= 6;
+
+  useEffect(() => {
+    if (isPerfect && !profile?.rewardClaimedToday) {
+      setLocation("/rewards");
+    }
+  }, [isPerfect, profile?.rewardClaimedToday, setLocation]);
 
   if (isLoading) {
     return (
@@ -97,15 +110,6 @@ export default function Dashboard() {
     cha: profile.charisma
   };
 
-  const questProgress = profile.questProgress as any;
-  const isQuestComplete = 
-    questProgress.push >= 35 && 
-    questProgress.sit >= 35 && 
-    questProgress.squat >= 30 && 
-    questProgress.plank >= 3 &&
-    questProgress.bible >= 3 &&
-    questProgress.book >= 5;
-
   return (
     <Layout>
       <div className="space-y-8 animate-in fade-in duration-700 slide-in-from-bottom-4">
@@ -115,15 +119,26 @@ export default function Dashboard() {
             <h1 className="text-4xl md:text-5xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50 mb-2">
               DASHBOARD
             </h1>
-            <p className="text-primary font-mono text-sm tracking-widest">
-              WELCOME BACK, <span className="text-white font-bold">{user?.firstName?.toUpperCase()}</span>
+            <p className="text-primary font-mono text-sm tracking-widest uppercase">
+              RANK: <span className="text-white font-bold">{profile.currentTitle}</span> | LVL: <span className="text-white font-bold">{Math.floor(profile.intelligence / 10)}</span>
             </p>
           </div>
-          <div className="text-right hidden md:block">
-            <div className="text-xs font-mono text-muted-foreground">SYSTEM STATUS</div>
-            <div className="text-accent font-bold tracking-wider flex items-center justify-end gap-2">
-              <span className="w-2 h-2 rounded-full bg-accent animate-pulse" />
-              OPERATIONAL
+          <div className="text-right">
+            <div className="flex items-center gap-4 mb-1">
+              <div className="text-right">
+                <div className="text-[10px] font-mono text-muted-foreground uppercase">Streak</div>
+                <div className="text-orange-500 font-bold flex items-center gap-1 justify-end">
+                  <Flame size={14} /> {profile.disciplineStreak}
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-[10px] font-mono text-muted-foreground uppercase">Merit</div>
+                <div className="text-accent font-bold">{profile.disciplinePoints}</div>
+              </div>
+            </div>
+            <div className="text-accent font-bold tracking-wider flex items-center justify-end gap-2 text-[10px]">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent animate-pulse" />
+              SYSTEM SYNCHRONIZED
             </div>
           </div>
         </div>
@@ -131,138 +146,85 @@ export default function Dashboard() {
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Core Attribute Training */}
-          <CyberCard title="CORE ATTRIBUTES (0-500)" variant="neon">
+          <CyberCard title="CORE ATTRIBUTES" variant="neon">
             <div className="space-y-6">
               <StatRadar stats={coreData} />
               <div className="grid grid-cols-2 gap-4">
-                <StatTrainer 
-                  label="STR" 
-                  value={profile.strength} 
-                  onIncrement={() => incrementMutation.mutate("strength")} 
-                  disabled={incrementMutation.isPending || profile.strength >= 500} 
-                />
-                <StatTrainer 
-                  label="INT" 
-                  value={profile.intelligence} 
-                  onIncrement={() => incrementMutation.mutate("intelligence")} 
-                  disabled={incrementMutation.isPending || profile.intelligence >= 500} 
-                />
-                <StatTrainer 
-                  label="AGI" 
-                  value={profile.agility} 
-                  onIncrement={() => incrementMutation.mutate("agility")} 
-                  disabled={incrementMutation.isPending || profile.agility >= 500} 
-                />
-                <StatTrainer 
-                  label="VIT" 
-                  value={profile.vitality} 
-                  onIncrement={() => incrementMutation.mutate("vitality")} 
-                  disabled={incrementMutation.isPending || profile.vitality >= 500} 
-                />
-                <StatTrainer 
-                  label="SEN" 
-                  value={profile.sense} 
-                  onIncrement={() => incrementMutation.mutate("sense")} 
-                  disabled={incrementMutation.isPending || profile.sense >= 500} 
-                />
-                <StatTrainer 
-                  label="CHA" 
-                  value={profile.charisma} 
-                  onIncrement={() => incrementMutation.mutate("charisma")} 
-                  disabled={incrementMutation.isPending || profile.charisma >= 500} 
-                />
+                <StatTrainer label="STR" value={profile.strength} onIncrement={() => incrementMutation.mutate("strength")} disabled={incrementMutation.isPending || profile.strength >= 500} />
+                <StatTrainer label="INT" value={profile.intelligence} onIncrement={() => incrementMutation.mutate("intelligence")} disabled={incrementMutation.isPending || profile.intelligence >= 500} />
+                <StatTrainer label="AGI" value={profile.agility} onIncrement={() => incrementMutation.mutate("agility")} disabled={incrementMutation.isPending || profile.agility >= 500} />
+                <StatTrainer label="VIT" value={profile.vitality} onIncrement={() => incrementMutation.mutate("vitality")} disabled={incrementMutation.isPending || profile.vitality >= 500} />
+                <StatTrainer label="SEN" value={profile.sense} onIncrement={() => incrementMutation.mutate("sense")} disabled={incrementMutation.isPending || profile.sense >= 500} />
+                <StatTrainer label="CHA" value={profile.charisma} onIncrement={() => incrementMutation.mutate("charisma")} disabled={incrementMutation.isPending || profile.charisma >= 500} />
               </div>
             </div>
           </CyberCard>
 
-          {/* Kaizen Hexagon */}
-          <CyberCard title="KAIZEN HEXAGON (1-100)" variant="neon">
+          {/* Daily Quest Section */}
+          <CyberCard title="DAILY QUEST" variant="neon" className="relative">
+            <div className="absolute top-4 right-4 text-cyan-500/50">
+              <span className="text-[10px] font-mono uppercase tracking-widest">{completedCount}/10 TASKS</span>
+            </div>
+            
+            {!isSafe && (
+              <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded flex items-center gap-3 animate-pulse">
+                <AlertTriangle className="text-red-500 w-5 h-5" />
+                <div className="flex-1">
+                  <p className="text-red-500 text-[10px] font-mono font-bold uppercase">Punishment State Active</p>
+                  <p className="text-red-400/60 text-[8px] font-mono">COMPLETE AT LEAST 6 TASKS TO AVOID PENALTY.</p>
+                </div>
+              </div>
+            )}
+
             <div className="space-y-6">
-              <StatRadar stats={kaizenData} />
-              <div className="space-y-4">
-                <KaizenSlider label="STR" value={profile.kaizenStr} onChange={(v: number[]) => updateKaizenMutation.mutate({ kaizenStr: v[0] })} />
-                <KaizenSlider label="INT" value={profile.kaizenInt} onChange={(v: number[]) => updateKaizenMutation.mutate({ kaizenInt: v[0] })} />
-                <KaizenSlider label="SPI" value={profile.kaizenSpi} onChange={(v: number[]) => updateKaizenMutation.mutate({ kaizenSpi: v[0] })} />
-                <KaizenSlider label="VIT" value={profile.kaizenVit} onChange={(v: number[]) => updateKaizenMutation.mutate({ kaizenVit: v[0] })} />
-                <KaizenSlider label="WIS" value={profile.kaizenWis} onChange={(v: number[]) => updateKaizenMutation.mutate({ kaizenWis: v[0] })} />
-                <KaizenSlider label="DIS" value={profile.kaizenDis} onChange={(v: number[]) => updateKaizenMutation.mutate({ kaizenDis: v[0] })} />
+              {/* Priority Tasks */}
+              <div className="space-y-3">
+                <p className="text-[10px] font-mono text-red-500/80 font-bold uppercase tracking-widest flex items-center gap-2">
+                  <span className="w-1 h-1 bg-red-500 rounded-full" /> MANDATORY PRIORITY: FLOW SESSIONS
+                </p>
+                <div className="grid grid-cols-1 gap-2">
+                  {[1, 2, 3, 4, 5, 6, 7].map(num => (
+                    <QuestRow 
+                      key={`flow${num}`}
+                      label={`Deep Work Flow session ${num}`} 
+                      current={questProgress[`flow${num}`]} 
+                      target={1} 
+                      onPlus={() => updateQuestMutation.mutate(`flow${num}`)} 
+                      priority
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Physical/Spiritual Tasks */}
+              <div className="space-y-3 pt-4 border-t border-white/5">
+                <p className="text-[10px] font-mono text-cyan-500/80 uppercase tracking-widest">Secondary Objectives</p>
+                <div className="space-y-3">
+                  <QuestRow label="Push-ups (35 reps)" current={questProgress.push} target={35} onPlus={() => updateQuestMutation.mutate("push")} />
+                  <QuestRow label="Sit-ups (35 reps)" current={questProgress.sit} target={35} onPlus={() => updateQuestMutation.mutate("sit")} />
+                  <QuestRow label="Squats (30 reps)" current={questProgress.squat} target={30} onPlus={() => updateQuestMutation.mutate("squat")} />
+                </div>
+              </div>
+
+              <div className="mt-8 pt-6 border-t border-white/5 text-center">
+                <div className="flex justify-center gap-4 mb-4">
+                   <div className={`px-3 py-1 border text-[10px] font-mono ${isSafe ? 'border-green-500/50 text-green-500' : 'border-white/20 text-white/20'}`}>
+                     SAFE (6/10)
+                   </div>
+                   <div className={`px-3 py-1 border text-[10px] font-mono ${isPerfect ? 'border-yellow-500/50 text-yellow-500 animate-pulse' : 'border-white/20 text-white/20'}`}>
+                     REWARD (10/10)
+                   </div>
+                </div>
+                <CyberButton 
+                  onClick={() => claimRecoveryMutation.mutate()}
+                  disabled={!isPerfect || claimRecoveryMutation.isPending || profile.rewardClaimedToday}
+                  className="w-full"
+                >
+                  {profile.rewardClaimedToday ? "PROTOCOL COMPLETE" : "CLAIM RECOVERY"}
+                </CyberButton>
               </div>
             </div>
           </CyberCard>
-        </div>
-
-        {/* Daily Quest Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <CyberCard title="QUEST INFO" variant="neon" className="relative">
-              <div className="absolute top-4 right-4 text-cyan-500/50">
-                <Info size={20} />
-              </div>
-              <div className="text-center mb-8">
-                <p className="text-cyan-400 font-mono text-sm">[Daily Quest: Strength Training has arrived.]</p>
-                <h2 className="text-3xl font-display font-black text-white mt-4 border-b-2 border-white inline-block px-4 pb-1">GOAL</h2>
-              </div>
-
-              <div className="space-y-6 max-w-md mx-auto">
-                <QuestRow label="Push-ups" current={questProgress.push} target={35} onPlus={() => updateQuestMutation.mutate("push")} />
-                <QuestRow label="Sit-ups" current={questProgress.sit} target={35} onPlus={() => updateQuestMutation.mutate("sit")} />
-                <QuestRow label="Squats" current={questProgress.squat} target={30} onPlus={() => updateQuestMutation.mutate("squat")} />
-                <QuestRow label="1min Plank" current={questProgress.plank} target={3} unit="x" onPlus={() => updateQuestMutation.mutate("plank")} />
-                <QuestRow label="Bible" current={questProgress.bible} target={3} unit=" chapters" onPlus={() => updateQuestMutation.mutate("bible")} />
-                <QuestRow label="Book" current={questProgress.book} target={5} unit=" pages" onPlus={() => updateQuestMutation.mutate("book")} />
-              </div>
-
-              <div className="mt-12 text-center space-y-8">
-                <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-lg">
-                  <p className="text-[10px] font-mono text-red-500 uppercase mb-2 tracking-widest">Active Penalties</p>
-                  <ul className="text-xs font-mono text-red-400/80 space-y-1">
-                    <li>• +10 PUSH UPS NEXT DAY</li>
-                    <li>• PAY FOR A FRIEND'S MEAL</li>
-                    <li>• NO REWARDS IN A COMPLETED DAY</li>
-                  </ul>
-                </div>
-                <p className="text-xs font-mono text-white/60">
-                  WARNING: Failure to complete the daily quest will result in an appropriate <span className="text-red-500 font-bold">penalty</span>.
-                </p>
-                <div className="flex justify-center">
-                  <button 
-                    onClick={() => claimRecoveryMutation.mutate()}
-                    disabled={!isQuestComplete || claimRecoveryMutation.isPending}
-                    className={`w-16 h-16 border-2 flex items-center justify-center transition-all ${
-                      isQuestComplete 
-                        ? "border-green-500 text-green-500 hover:bg-green-500/20 animate-pulse" 
-                        : "border-white/20 text-white/20 cursor-not-allowed"
-                    }`}
-                  >
-                    <CheckCircle2 size={32} />
-                  </button>
-                </div>
-              </div>
-            </CyberCard>
-          </div>
-
-          <div className="lg:col-span-1">
-             <CyberCard title="DISCIPLINE LOG" variant="neon">
-               <div className="space-y-4">
-                 <p className="text-xs font-mono text-cyan-500/60 mb-4 uppercase tracking-widest">Fixed Tasks</p>
-                 <DisciplineTask label="System Initialization" completed />
-                 <DisciplineTask label="Attribute Calibration" completed />
-                 <p className="text-xs font-mono text-cyan-500/60 my-4 uppercase tracking-widest">Rotating Tasks</p>
-                 <DisciplineTask label="Deep Focus Protocol" />
-                 <DisciplineTask label="Neural Network Sync" />
-                 <DisciplineTask label="Biometric Log Update" />
-               </div>
-               <div className="mt-8 pt-6 border-t border-cyan-500/20">
-                 <div className="flex justify-between items-end">
-                   <div>
-                     <p className="text-[10px] font-mono text-cyan-500/60 uppercase">Reward Status</p>
-                     <p className="text-xl font-display text-white">2 / 5 TASKS</p>
-                   </div>
-                   <CyberButton size="sm" variant="ghost" disabled>CLAIM FTP</CyberButton>
-                 </div>
-               </div>
-             </CyberCard>
-          </div>
         </div>
       </div>
     </Layout>
@@ -273,7 +235,7 @@ function StatTrainer({ label, value, onIncrement, disabled }: any) {
   return (
     <div className="p-3 bg-cyan-950/20 border border-cyan-500/20 rounded flex justify-between items-center group hover:border-cyan-500/40 transition-all">
       <div className="flex flex-col">
-        <span className="font-mono text-xs text-cyan-500/60">{label}</span>
+        <span className="font-mono text-[10px] text-cyan-500/60 uppercase">{label}</span>
         <span className="font-display font-bold text-white text-lg">{value}</span>
       </div>
       <button 
@@ -287,57 +249,26 @@ function StatTrainer({ label, value, onIncrement, disabled }: any) {
   );
 }
 
-function KaizenSlider({ label, value, onChange }: any) {
-  return (
-    <div className="space-y-2">
-      <div className="flex justify-between text-[10px] font-mono uppercase tracking-tighter">
-        <span className="text-cyan-500/60">{label}</span>
-        <span className="text-cyan-400">{value}</span>
-      </div>
-      <Slider 
-        value={[value]} 
-        max={100} 
-        min={1} 
-        step={1} 
-        onValueChange={onChange}
-        className="[&_[role=slider]]:bg-cyan-400 [&_[role=slider]]:border-cyan-400" 
-      />
-    </div>
-  );
-}
-
-function QuestRow({ label, current, target, onPlus, unit = "" }: any) {
+function QuestRow({ label, current, target, onPlus, unit = "", priority = false }: any) {
   const isDone = current >= target;
   return (
-    <div className="flex items-center gap-4 group">
-      <span className="flex-1 font-display text-white text-lg tracking-wide">{label}</span>
-      <span className={`font-mono text-lg ${isDone ? 'text-green-400' : 'text-cyan-400/80'}`}>
+    <div className={`flex items-center gap-4 group p-2 rounded transition-all ${priority ? 'bg-red-500/5 border border-red-500/10' : 'hover:bg-white/5'}`}>
+      <span className={`flex-1 font-mono text-xs tracking-tight ${isDone ? 'text-white/40 line-through' : priority ? 'text-red-400 font-bold' : 'text-white/80'}`}>
+        {priority && <span className="text-[8px] bg-red-500 text-white px-1 mr-2 rounded">PRIORITY</span>}
+        {label}
+      </span>
+      <span className={`font-mono text-xs ${isDone ? 'text-green-500' : priority ? 'text-red-400' : 'text-cyan-400/80'}`}>
         [{current}/{target}{unit}]
       </span>
       <button 
         onClick={onPlus}
         disabled={isDone}
-        className={`w-6 h-6 border flex items-center justify-center transition-all ${
-          isDone ? 'border-green-500 text-green-500 opacity-50' : 'border-white/40 text-white/40 hover:border-cyan-500 hover:text-cyan-500'
+        className={`w-5 h-5 border flex items-center justify-center transition-all ${
+          isDone ? 'border-green-500 text-green-500 opacity-50' : priority ? 'border-red-500/40 text-red-500/40 hover:border-red-500 hover:text-red-500' : 'border-white/20 text-white/20 hover:border-cyan-500 hover:text-cyan-500'
         }`}
       >
-        {isDone ? <CheckCircle2 size={12} /> : <Plus size={12} />}
+        {isDone ? <CheckCircle2 size={10} /> : <Plus size={10} />}
       </button>
-    </div>
-  );
-}
-
-function DisciplineTask({ label, completed = false }: { label: string, completed?: boolean }) {
-  return (
-    <div className={`flex items-center gap-3 p-3 border transition-all ${
-      completed ? 'border-cyan-500/30 bg-cyan-500/5' : 'border-white/5 bg-white/5 opacity-40'
-    }`}>
-      <div className={`w-4 h-4 border flex items-center justify-center ${
-        completed ? 'border-cyan-400 text-cyan-400' : 'border-white/40'
-      }`}>
-        {completed && <CheckCircle2 size={10} />}
-      </div>
-      <span className="text-xs font-display text-white uppercase tracking-tight">{label}</span>
     </div>
   );
 }

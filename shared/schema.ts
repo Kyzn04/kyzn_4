@@ -28,14 +28,18 @@ export const profiles = pgTable("profiles", {
   // HP/MP (Energy and Focus)
   hp: integer("hp").default(100).notNull(),
   mp: integer("mp").default(100).notNull(),
+  // Discipline & Rewards
+  disciplinePoints: integer("discipline_points").default(0).notNull(),
+  disciplineStreak: integer("discipline_streak").default(0).notNull(),
+  longestStreak: integer("longest_streak").default(0).notNull(),
+  totalDisciplinedDays: integer("total_disciplined_days").default(0).notNull(),
+  rewardClaimedToday: boolean("reward_claimed_today").default(false).notNull(),
   // Quest Progress
   questProgress: jsonb("quest_progress").default({ 
+    flow1: 0, flow2: 0, flow3: 0, flow4: 0, flow5: 0, flow6: 0, flow7: 0,
     push: 0, 
     sit: 0, 
-    squat: 0, 
-    plank: 0, 
-    bible: 0, 
-    book: 0 
+    squat: 0 
   }).notNull(),
   // Meta
   currentTitle: text("current_title").default("Unawakened").notNull(),

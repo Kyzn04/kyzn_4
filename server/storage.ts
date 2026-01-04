@@ -117,15 +117,15 @@ export class DatabaseStorage implements IStorage {
     
     const questMap = { ...(profile.questProgress as Record<string, number>) };
     const questMax: Record<string, number> = {
+      flow1: 1, flow2: 1, flow3: 1, flow4: 1, flow5: 1, flow6: 1, flow7: 1,
       push: 35,
       sit: 35,
-      squat: 30,
-      plank: 3,
-      bible: 3,
-      book: 5
+      squat: 30
     };
     
-    const maxValue = questMax[quest] || 100;
+    if (!(quest in questMax)) throw new Error("INVALID QUEST TYPE");
+
+    const maxValue = questMax[quest];
     questMap[quest] = Math.min(maxValue, (questMap[quest] || 0) + 1);
     
     const updated = await this.updateProfile(userId, { questProgress: questMap });
@@ -145,9 +145,38 @@ export class DatabaseStorage implements IStorage {
       vitality: profile.vitality + 2,
       sense: profile.sense + 2,
       charisma: profile.charisma + 2,
-      questProgress: { push: 0, sit: 0, squat: 0, plank: 0, bible: 0, book: 0 }
+      questProgress: { 
+        flow1: 0, flow2: 0, flow3: 0, flow4: 0, flow5: 0, flow6: 0, flow7: 0,
+        push: 0, sit: 0, squat: 0 
+      },
+      rewardClaimedToday: false
     });
     return updated;
+  }
+
+  async claimReward(userId: string, type: string): Promise<Profile> {
+    const profile = await this.getProfile(userId);
+    if (!profile) throw new Error("Profile not found");
+    if (profile.rewardClaimedToday) throw new Error("REWARD ALREADY CLAIMED TODAY");
+
+    const questProgress = profile.questProgress as Record<string, number>;
+    const completedCount = Object.values(questProgress).filter(v => v >= 1).length;
+    if (completedCount < 10) throw new Error("INSUFFICIENT MERIT");
+
+    const updates: UpdateProfileRequest = {
+      rewardClaimedToday: true
+    };
+
+    if (type === "merit") {
+      updates.disciplinePoints = profile.disciplinePoints + 10;
+      updates.disciplineStreak = profile.disciplineStreak + 1;
+      updates.totalDisciplinedDays = profile.totalDisciplinedDays + 1;
+      if (updates.disciplineStreak > profile.longestStreak) {
+        updates.longestStreak = updates.disciplineStreak;
+      }
+    }
+
+    return await this.updateProfile(userId, updates);
   }
 }
 

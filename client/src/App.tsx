@@ -9,6 +9,7 @@ import { Loader2 } from "lucide-react";
 import Dashboard from "@/pages/Dashboard";
 import SkillTree from "@/pages/SkillTree";
 import ProfilePage from "@/pages/Profile";
+import RewardsPage from "@/pages/Rewards";
 import Landing from "@/pages/Landing";
 import NotFound from "@/pages/not-found";
 
@@ -58,6 +59,10 @@ function Router() {
       
       <Route path="/profile">
         {() => <ProtectedRoute component={ProfilePage} />}
+      </Route>
+
+      <Route path="/rewards">
+        {() => <ProtectedRoute component={RewardsPage} />}
       </Route>
 
       <Route component={NotFound} />
