@@ -58,14 +58,14 @@ export default function Dashboard() {
 
   const questProgress = profile?.questProgress as any;
   
-  const isPerfect = questProgress && 
-    questProgress.flow >= 7 && 
-    questProgress.push >= 35 && 
-    questProgress.sit >= 35 && 
-    questProgress.squat >= 30;
+  const flowComplete = (questProgress?.flow || 0) >= 7;
+  const secondaryTasks = Object.entries(questProgress || {})
+    .filter(([key, val]) => key !== "flow" && (val as number) > 0);
+  const secondaryCount = secondaryTasks.length;
+
+  const isPerfect = flowComplete && secondaryCount >= 3;
     
-  const completedCount = questProgress ? Object.values(questProgress).filter((v: any) => typeof v === 'number' && v > 0).length : 0;
-  const isSafe = (questProgress?.flow || 0) >= 4 || completedCount >= 4;
+  const isSafe = (questProgress?.flow || 0) >= 4 || secondaryCount >= 2;
 
   useEffect(() => {
     if (isPerfect && !profile?.rewardClaimedToday) {
@@ -138,6 +138,10 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="text-right">
+                <div className="text-[10px] font-mono text-muted-foreground uppercase">Favor</div>
+                <div className="text-yellow-500 font-bold">{profile.favorPoints || 0}</div>
+              </div>
+              <div className="text-right">
                 <div className="text-[10px] font-mono text-muted-foreground uppercase">Merit</div>
                 <div className="text-accent font-bold">{profile.disciplinePoints}</div>
               </div>
@@ -169,7 +173,7 @@ export default function Dashboard() {
           {/* Daily Quest Section */}
           <CyberCard title="DAILY QUEST" variant="neon" className="relative">
             <div className="absolute top-4 right-4 text-cyan-500/50">
-              <span className="text-[10px] font-mono uppercase tracking-widest">{completedCount}/4 TASKS</span>
+              <span className="text-[10px] font-mono uppercase tracking-widest">{flowComplete ? "FLOW SECURED" : `${questProgress?.flow || 0}/7 FLOW`}</span>
             </div>
             
             {!isSafe && (
@@ -177,7 +181,7 @@ export default function Dashboard() {
                 <AlertTriangle className="text-red-500 w-5 h-5" />
                 <div className="flex-1">
                   <p className="text-red-500 text-[10px] font-mono font-bold uppercase">Punishment State Active</p>
-                  <p className="text-red-400/60 text-[8px] font-mono">COMPLETE AT LEAST 4 TASKS TO AVOID PENALTY.</p>
+                  <p className="text-red-400/60 text-[8px] font-mono">FLOW PROTOCOL OR SECONDARY OBJECTIVES UNMET.</p>
                 </div>
               </div>
             )}
@@ -186,7 +190,7 @@ export default function Dashboard() {
               {/* Priority Tasks */}
               <div className="space-y-3">
                 <p className="text-[10px] font-mono text-red-500/80 font-bold uppercase tracking-widest flex items-center gap-2">
-                  <span className="w-1 h-1 bg-red-500 rounded-full" /> MANDATORY PRIORITY: FLOW SESSIONS
+                  <span className="w-1 h-1 bg-red-500 rounded-full" /> MANDATORY PRIORITY: FLOW STATE
                 </p>
                 <div className="grid grid-cols-1 gap-2">
                   <QuestRow 
@@ -202,11 +206,21 @@ export default function Dashboard() {
 
               {/* Physical Tasks */}
               <div className="space-y-3 pt-4 border-t border-white/5">
-                <p className="text-[10px] font-mono text-cyan-500/80 uppercase tracking-widest">Secondary Objectives</p>
-                <div className="space-y-3">
+                <p className="text-[10px] font-mono text-cyan-500/80 uppercase tracking-widest">Workout Objectives</p>
+                <div className="space-y-2">
                   <QuestRow label="Push-ups (35 reps)" current={questProgress?.push || 0} target={35} onPlus={() => updateQuestMutation.mutate({ quest: "push", mode: "increment" })} onComplete={() => updateQuestMutation.mutate({ quest: "push", mode: "complete" })} />
                   <QuestRow label="Sit-ups (35 reps)" current={questProgress?.sit || 0} target={35} onPlus={() => updateQuestMutation.mutate({ quest: "sit", mode: "increment" })} onComplete={() => updateQuestMutation.mutate({ quest: "sit", mode: "complete" })} />
                   <QuestRow label="Squats (30 reps)" current={questProgress?.squat || 0} target={30} onPlus={() => updateQuestMutation.mutate({ quest: "squat", mode: "increment" })} onComplete={() => updateQuestMutation.mutate({ quest: "squat", mode: "complete" })} />
+                </div>
+              </div>
+
+              {/* Spiritual/Maintenance Tasks */}
+              <div className="space-y-3 pt-4 border-t border-white/5">
+                <p className="text-[10px] font-mono text-primary/80 uppercase tracking-widest">System Maintenance</p>
+                <div className="space-y-2">
+                  <QuestRow label="Bible (3 chapters)" current={questProgress?.bible || 0} target={3} onPlus={() => updateQuestMutation.mutate({ quest: "bible", mode: "increment" })} onComplete={() => updateQuestMutation.mutate({ quest: "bible", mode: "complete" })} />
+                  <QuestRow label="Reading (5 pages)" current={questProgress?.book || 0} target={5} onPlus={() => updateQuestMutation.mutate({ quest: "book", mode: "increment" })} onComplete={() => updateQuestMutation.mutate({ quest: "book", mode: "complete" })} />
+                  <QuestRow label="Nutrition (4 meals)" current={questProgress?.meals || 0} target={4} onPlus={() => updateQuestMutation.mutate({ quest: "meals", mode: "increment" })} onComplete={() => updateQuestMutation.mutate({ quest: "meals", mode: "complete" })} />
                 </div>
               </div>
 
@@ -216,7 +230,7 @@ export default function Dashboard() {
                      SAFE
                    </div>
                    <div className={`px-3 py-1 border text-[10px] font-mono ${isPerfect ? 'border-yellow-500/50 text-yellow-500 animate-pulse' : 'border-white/20 text-white/20'}`}>
-                     REWARD (100%)
+                     REWARD ELIGIBLE ({secondaryCount}/3 + FLOW)
                    </div>
                 </div>
                 <CyberButton 

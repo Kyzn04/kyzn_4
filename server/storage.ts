@@ -120,19 +120,41 @@ export class DatabaseStorage implements IStorage {
       flow: 7,
       push: 35,
       sit: 35,
-      squat: 30
+      squat: 30,
+      bible: 3,
+      book: 5,
+      meals: 4
     };
     
     if (!(quest in questMax)) throw new Error("INVALID QUEST TYPE");
 
     const maxValue = questMax[quest];
+    const prevValue = questMap[quest] || 0;
+    
     if (mode === "complete") {
       questMap[quest] = maxValue;
     } else {
-      questMap[quest] = Math.min(maxValue, (questMap[quest] || 0) + 1);
+      questMap[quest] = Math.min(maxValue, prevValue + 1);
     }
     
-    const updated = await this.updateProfile(userId, { questProgress: questMap });
+    const newValue = questMap[quest];
+    const updates: UpdateProfileRequest = { questProgress: questMap };
+
+    // Bonus Points Logic
+    if (newValue > prevValue) {
+      // Favor Points for Biblical/Reading tasks
+      if (quest === "bible" || quest === "book") {
+        updates.favorPoints = (profile.favorPoints || 0) + (mode === "complete" ? (maxValue - prevValue) * 10 : 10);
+      }
+      
+      // Discipline for Workouts
+      if (quest === "push" || quest === "sit" || quest === "squat") {
+        updates.disciplinePoints = (profile.disciplinePoints || 0) + (mode === "complete" ? (maxValue - prevValue) : 1);
+        updates.kaizenDis = Math.min(100, (profile.kaizenDis || 0) + 1);
+      }
+    }
+    
+    const updated = await this.updateProfile(userId, updates);
     return updated;
   }
 
@@ -151,7 +173,8 @@ export class DatabaseStorage implements IStorage {
       charisma: profile.charisma + 2,
       questProgress: { 
         flow: 0,
-        push: 0, sit: 0, squat: 0 
+        push: 0, sit: 0, squat: 0,
+        bible: 0, book: 0, meals: 0
       },
       rewardClaimedToday: false
     });
@@ -164,8 +187,11 @@ export class DatabaseStorage implements IStorage {
     if (profile.rewardClaimedToday) throw new Error("REWARD ALREADY CLAIMED TODAY");
 
     const questProgress = profile.questProgress as Record<string, number>;
-    const completedCount = Object.values(questProgress).filter(v => v >= 1).length;
-    if (completedCount < 10) throw new Error("INSUFFICIENT MERIT");
+    const flowCompleted = (questProgress.flow || 0) >= 7;
+    const otherTasksCompleted = Object.entries(questProgress)
+      .filter(([key, val]) => key !== "flow" && val >= 1).length;
+    
+    if (!flowCompleted || otherTasksCompleted < 3) throw new Error("INSUFFICIENT MERIT: SYSTEM REQUIRES 7/7 FLOW + 3 OBJECTIVES");
 
     const updates: UpdateProfileRequest = {
       rewardClaimedToday: true

@@ -30,6 +30,7 @@ export const profiles = pgTable("profiles", {
   mp: integer("mp").default(100).notNull(),
   // Discipline & Rewards
   disciplinePoints: integer("discipline_points").default(0).notNull(),
+  favorPoints: integer("favor_points").default(0).notNull(),
   disciplineStreak: integer("discipline_streak").default(0).notNull(),
   longestStreak: integer("longest_streak").default(0).notNull(),
   totalDisciplinedDays: integer("total_disciplined_days").default(0).notNull(),
@@ -39,7 +40,10 @@ export const profiles = pgTable("profiles", {
     flow: 0,
     push: 0, 
     sit: 0, 
-    squat: 0 
+    squat: 0,
+    bible: 0,
+    book: 0,
+    meals: 0
   }).notNull(),
   // Meta
   currentTitle: text("current_title").default("Unawakened").notNull(),
