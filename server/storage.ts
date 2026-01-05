@@ -123,7 +123,10 @@ export class DatabaseStorage implements IStorage {
       squat: 30,
       bible: 3,
       book: 5,
-      meals: 4
+      meals: 4,
+      meditation: 1,
+      journaling: 1,
+      creation: 1
     };
     
     if (!(quest in questMax)) throw new Error("INVALID QUEST TYPE");
@@ -142,14 +145,23 @@ export class DatabaseStorage implements IStorage {
 
     // Bonus Points Logic
     if (newValue > prevValue) {
+      const completionDiff = mode === "complete" ? (maxValue - prevValue) : 1;
+      
+      // Global XP Gain (10 XP per action)
+      updates.experience = (profile.experience || 0) + (completionDiff * 10);
+      
+      // Level up logic (e.g. 100 XP per level)
+      const newXp = updates.experience;
+      updates.level = Math.floor(newXp / 100) + 1;
+
       // Favor Points for Biblical/Reading tasks
       if (quest === "bible" || quest === "book") {
-        updates.favorPoints = (profile.favorPoints || 0) + (mode === "complete" ? (maxValue - prevValue) * 10 : 10);
+        updates.favorPoints = (profile.favorPoints || 0) + (completionDiff * 10);
       }
       
       // Discipline for Workouts
       if (quest === "push" || quest === "sit" || quest === "squat") {
-        updates.disciplinePoints = (profile.disciplinePoints || 0) + (mode === "complete" ? (maxValue - prevValue) : 1);
+        updates.disciplinePoints = (profile.disciplinePoints || 0) + completionDiff;
         updates.kaizenDis = Math.min(100, (profile.kaizenDis || 0) + 1);
       }
     }
@@ -174,7 +186,8 @@ export class DatabaseStorage implements IStorage {
       questProgress: { 
         flow: 0,
         push: 0, sit: 0, squat: 0,
-        bible: 0, book: 0, meals: 0
+        bible: 0, book: 0, meals: 0,
+        meditation: 0, journaling: 0, creation: 0
       },
       rewardClaimedToday: false
     });

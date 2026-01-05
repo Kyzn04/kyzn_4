@@ -29,6 +29,8 @@ export const profiles = pgTable("profiles", {
   hp: integer("hp").default(100).notNull(),
   mp: integer("mp").default(100).notNull(),
   // Discipline & Rewards
+  experience: integer("experience").default(0).notNull(),
+  level: integer("level").default(1).notNull(),
   disciplinePoints: integer("discipline_points").default(0).notNull(),
   favorPoints: integer("favor_points").default(0).notNull(),
   disciplineStreak: integer("discipline_streak").default(0).notNull(),
@@ -43,7 +45,10 @@ export const profiles = pgTable("profiles", {
     squat: 0,
     bible: 0,
     book: 0,
-    meals: 0
+    meals: 0,
+    meditation: 0,
+    journaling: 0,
+    creation: 0
   }).notNull(),
   // Meta
   currentTitle: text("current_title").default("Unawakened").notNull(),

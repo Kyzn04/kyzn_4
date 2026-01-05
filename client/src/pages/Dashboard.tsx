@@ -126,11 +126,15 @@ export default function Dashboard() {
               DASHBOARD
             </h1>
             <p className="text-primary font-mono text-sm tracking-widest uppercase">
-              RANK: <span className="text-white font-bold">{profile.currentTitle}</span> | LVL: <span className="text-white font-bold">{Math.floor(profile.intelligence / 10)}</span>
+              RANK: <span className="text-white font-bold">{profile.currentTitle}</span> | LVL: <span className="text-white font-bold">{profile.level}</span>
             </p>
           </div>
           <div className="text-right">
             <div className="flex items-center gap-4 mb-1">
+              <div className="text-right">
+                <div className="text-[10px] font-mono text-muted-foreground uppercase">XP</div>
+                <div className="text-primary font-bold">{profile.experience}</div>
+              </div>
               <div className="text-right">
                 <div className="text-[10px] font-mono text-muted-foreground uppercase">Streak</div>
                 <div className="text-orange-500 font-bold flex items-center gap-1 justify-end">
@@ -221,6 +225,9 @@ export default function Dashboard() {
                   <QuestRow label="Bible (3 chapters)" current={questProgress?.bible || 0} target={3} onPlus={() => updateQuestMutation.mutate({ quest: "bible", mode: "increment" })} onComplete={() => updateQuestMutation.mutate({ quest: "bible", mode: "complete" })} />
                   <QuestRow label="Reading (5 pages)" current={questProgress?.book || 0} target={5} onPlus={() => updateQuestMutation.mutate({ quest: "book", mode: "increment" })} onComplete={() => updateQuestMutation.mutate({ quest: "book", mode: "complete" })} />
                   <QuestRow label="Nutrition (4 meals)" current={questProgress?.meals || 0} target={4} onPlus={() => updateQuestMutation.mutate({ quest: "meals", mode: "increment" })} onComplete={() => updateQuestMutation.mutate({ quest: "meals", mode: "complete" })} />
+                  <QuestRow label="Meditation" current={questProgress?.meditation || 0} target={1} onPlus={() => updateQuestMutation.mutate({ quest: "meditation", mode: "increment" })} onComplete={() => updateQuestMutation.mutate({ quest: "meditation", mode: "complete" })} />
+                  <QuestRow label="Journaling" current={questProgress?.journaling || 0} target={1} onPlus={() => updateQuestMutation.mutate({ quest: "journaling", mode: "increment" })} onComplete={() => updateQuestMutation.mutate({ quest: "journaling", mode: "complete" })} />
+                  <QuestRow label="Creation Output" current={questProgress?.creation || 0} target={1} onPlus={() => updateQuestMutation.mutate({ quest: "creation", mode: "increment" })} onComplete={() => updateQuestMutation.mutate({ quest: "creation", mode: "complete" })} />
                 </div>
               </div>
 
