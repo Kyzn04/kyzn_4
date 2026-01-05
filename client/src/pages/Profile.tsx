@@ -200,7 +200,12 @@ export default function ProfilePage() {
                       render={({ field }) => (
                         <FormItem>
                           <FormControl>
-                            <Textarea {...field} className="bg-black/40 border-cyan-500/20 text-cyan-100 font-mono resize-none focus:border-cyan-400" placeholder="Awaiting system log entry..." />
+                            <Textarea 
+                              {...field} 
+                              value={field.value || ""} 
+                              className="bg-black/40 border-cyan-500/20 text-cyan-100 font-mono resize-none focus:border-cyan-400" 
+                              placeholder="Awaiting system log entry..." 
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

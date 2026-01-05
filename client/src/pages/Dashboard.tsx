@@ -68,10 +68,8 @@ export default function Dashboard() {
   const isSafe = (questProgress?.flow || 0) >= 4 || secondaryCount >= 2;
 
   useEffect(() => {
-    if (isPerfect && !profile?.rewardClaimedToday) {
-      setLocation("/rewards");
-    }
-  }, [isPerfect, profile?.rewardClaimedToday, setLocation]);
+    // Reward claiming handled by button, not auto-redirect
+  }, [isPerfect, profile?.rewardClaimedToday]);
 
   if (isLoading) {
     return (
