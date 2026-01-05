@@ -1,0 +1,230 @@
+
+DAILY QUEST STRUCTURE (DIVIDED BY DOMAIN)
+Ⅰ. Physical Discipline
+Purpose: Build strength, endurance, and bodily control.
+Push-ups — 35 reps
+
+
+Curl-ups — 35 reps
+
+
+Plank — 1 minute × 3 sets
+
+
+Each completed action grants Physical XP, contributing to STR and VIT growth.
+
+Ⅱ. Spiritual Discipline
+Purpose: Maintain spiritual clarity, alignment, and inner stability.
+Prayer
+
+
+Bible Reading
+
+
+Meditation / Silence Practice
+
+
+Completion grants Spiritual XP, influencing SPI, SEN, and MP stability.
+
+Ⅲ. Skillset Discipline
+Purpose: Compound intellectual and creative output.
+Read 5 pages of a book
+
+
+Journal (reflection, insight, or planning)
+
+
+1 Creation (code, design, writing, music, system improvement, etc.)
+
+
+Completion grants Skill XP, contributing to INT, WIS, and role-specific progression.
+
+Ⅳ. PRIORITY CONDITION — FLOW STATE
+Mandatory Requirement:
+7 / 7 Flow State Sessions completed
+
+
+Flow State represents deep, uninterrupted work.
+Failure to complete Flow State limits daily XP gain, regardless of other tasks.
+
+ROLE SELECTION SYSTEM (NEW TAB)
+Create a dedicated “Role” tab connected directly to the Skill Tree system.
+Choose a Primary Role
+Each role has a unique color identity and alters UI accents dynamically.
+The Engineer — Blue
+
+
+The Architect — Red
+
+
+The Chemist — Yellow
+
+
+The Entrepreneur — Green
+
+
+The Coder — Orange
+
+
+The Athlete — Black
+
+
+UI Behavior:
+The entire interface theme subtly shifts to reflect the selected role color
+
+
+Charts, highlights, and active elements adapt accordingly
+
+
+Roles influence:
+Skill tree access
+
+
+XP weighting
+
+
+Rank titles
+
+
+Long-term evolution paths
+
+
+
+IDENTITY CUSTOMIZATION
+Character Identity
+Gender selection (default preset included)
+
+
+Identity portrait with preloaded default images
+
+
+Option to upload a custom image to replace the default portrait
+
+
+The system must function fully even without customization.
+
+SKILL TREE & LEVELING SYSTEM
+Skill Tree Access
+Skill trees unlock based on chosen role
+
+
+Sub-skills unlock progressively through XP and rank thresholds
+
+
+Leveling Mechanics
+Every daily quest grants experience points
+
+
+XP contributes to:
+
+
+Character Level
+
+
+Role Level
+
+
+Skill Rank progression
+
+
+XP Curve:
+Leveling becomes progressively harder
+
+
+XP bar requires more points per level to prevent artificial inflation
+
+
+
+GUILD · CLASS · TITLE SYSTEM
+Customization Rules
+Create another tab for this. The purpose of this in the future is to be in a guild and you can view other people and peek in their progress
+Guild, Class, and Title are selectable only from earned or unlocked options
+
+
+Default titles exist until new ones are earned
+Phoenix 
+Cyna
+Midnight Reign
+Xicious 
+Sleep Token
+
+
+Guild System
+Players may join guilds
+
+
+Each guild has:
+
+
+A public profile
+
+
+Member progress visibility
+
+
+Shared objectives or identity
+
+
+Guilds are informational and motivational—not cosmetic.
+
+SKILL & TRAIT RANK SYSTEM
+All skills and traits are ranked from E → S, reflecting mastery.
+Rank Structure
+E — Lowest
+
+
+D
+
+
+C
+
+
+B
+
+
+A
+
+
+S — Highest
+
+
+Ranks are determined by:
+XP accumulation
+
+
+Consistency
+
+
+Relevant task completion
+
+
+
+Rank-Based Titles (Example: Engineering Role)
+E Rank — Novice Technician
+D Rank - Junior Engineer
+C Rank - Expert Electrician
+
+
+B Rank — Master Inventor
+A Rank - Prodigy Innovator
+
+
+S Rank — Engineering Polymath
+
+
+Titles update automatically as rank thresholds are crossed.
+
+CORE DESIGN PRINCIPLES (NON-NEGOTIABLE)
+Every task grants XP — nothing is decorative
+
+
+Progress must feel earned, not inflated
+
+
+No manual title cheating
+
+
+Difficulty scales with growth
+
+
+Identity, role, and progression must stay coherent
