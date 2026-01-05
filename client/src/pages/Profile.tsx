@@ -85,7 +85,8 @@ export default function ProfilePage() {
   }
 
   const hunterId = `ID-${user?.id?.toString().padStart(8, '0')}`;
-  const level = Math.floor(((profile?.strength || 0) + (profile?.intelligence || 0) + (profile?.vitality || 0)) / 10);
+  const level = profile?.level || 1;
+  const experience = profile?.experience || 0;
   
   const getRank = (lvl: number) => {
     if (lvl >= 100) return "S";
@@ -132,26 +133,26 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <div className="flex justify-between text-[10px] font-mono text-cyan-400/80 uppercase">
-                    <span>HP (Energy)</span>
-                    <span>{profile?.hp || 100} / 100</span>
+                    <span>XP (Progress)</span>
+                    <span>{experience % 100} / 100</span>
                   </div>
                   <div className="h-3 bg-cyan-950/40 border border-cyan-500/20 rounded-full overflow-hidden p-[1px]">
                     <motion.div 
                       initial={{ width: 0 }}
-                      animate={{ width: `${profile?.hp || 100}%` }}
+                      animate={{ width: `${experience % 100}%` }}
                       className="h-full bg-gradient-to-r from-cyan-600 to-cyan-400 shadow-[0_0_10px_rgba(0,229,255,0.4)]"
                     />
                   </div>
                 </div>
                 <div className="space-y-1">
                   <div className="flex justify-between text-[10px] font-mono text-cyan-400/80 uppercase">
-                    <span>MP (Focus)</span>
-                    <span>{profile?.mp || 100} / 100</span>
+                    <span>Level</span>
+                    <span>{level}</span>
                   </div>
                   <div className="h-3 bg-cyan-950/40 border border-cyan-500/20 rounded-full overflow-hidden p-[1px]">
                     <motion.div 
                       initial={{ width: 0 }}
-                      animate={{ width: `${profile?.mp || 100}%` }}
+                      animate={{ width: "100%" }}
                       className="h-full bg-gradient-to-r from-cyan-800 to-cyan-600 shadow-[0_0_10px_rgba(0,229,255,0.2)]"
                     />
                   </div>
