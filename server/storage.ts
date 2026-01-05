@@ -1,6 +1,6 @@
 import { db } from "./db";
 import {
-  profiles, skills, userSkills,
+  profiles, skills, userSkills, dailyTranscripts, rewardLogs,
   type Profile, type InsertProfile, type UpdateProfileRequest,
   type Skill, type UserSkill
 } from "@shared/schema";
@@ -17,12 +17,17 @@ export interface IStorage {
   getUserSkills(userId: string): Promise<UserSkill[]>;
   unlockSkill(userId: string, skillId: number): Promise<UserSkill>;
   
-  // Seed
-  createSkill(skill: any): Promise<Skill>;
-  getSkillByName(name: string): Promise<Skill | undefined>;
+  // Quests & Accountability
+  updateQuest(userId: string, quest: string, mode?: "increment" | "complete"): Promise<Profile>;
+  getDailyTranscripts(userId: string): Promise<any[]>;
+  claimReward(userId: string, type: string, details?: string): Promise<Profile>;
+  checkAndLogDailyProgress(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
+  async getDailyTranscripts(userId: string): Promise<any[]> {
+    return await db.select().from(dailyTranscripts).where(eq(dailyTranscripts.userId, userId));
+  }
   async getProfile(userId: string): Promise<Profile | undefined> {
     const [profile] = await db.select().from(profiles).where(eq(profiles.userId, userId));
     return profile;
@@ -194,32 +199,75 @@ export class DatabaseStorage implements IStorage {
     return updated;
   }
 
-  async claimReward(userId: string, type: string): Promise<Profile> {
+  async claimReward(userId: string, type: string, details?: string): Promise<Profile> {
     const profile = await this.getProfile(userId);
     if (!profile) throw new Error("Profile not found");
     if (profile.rewardClaimedToday) throw new Error("REWARD ALREADY CLAIMED TODAY");
 
     const questProgress = profile.questProgress as Record<string, number>;
-    const flowCompleted = (questProgress.flow || 0) >= 7;
-    const otherTasksCompleted = Object.entries(questProgress)
-      .filter(([key, val]) => key !== "flow" && val >= 1).length;
+    const completedTasks = Object.values(questProgress).filter(v => typeof v === 'number' && v >= 1).length;
     
-    if (!flowCompleted || otherTasksCompleted < 3) throw new Error("INSUFFICIENT MERIT: SYSTEM REQUIRES 7/7 FLOW + 3 OBJECTIVES");
+    if (completedTasks < 10) throw new Error("SYSTEM ERROR: INSUFFICIENT MERIT (10/10 REQUIRED)");
 
     const updates: UpdateProfileRequest = {
       rewardClaimedToday: true
     };
 
     if (type === "merit") {
-      updates.disciplinePoints = profile.disciplinePoints + 10;
-      updates.disciplineStreak = profile.disciplineStreak + 1;
-      updates.totalDisciplinedDays = profile.totalDisciplinedDays + 1;
-      if (updates.disciplineStreak > profile.longestStreak) {
-        updates.longestStreak = updates.disciplineStreak;
-      }
+      updates.disciplinePoints = (profile.disciplinePoints || 0) + 10;
     }
+    
+    // Log reward
+    await db.insert(rewardLogs).values({
+      userId,
+      rewardType: type,
+      details: details || "",
+    });
 
     return await this.updateProfile(userId, updates);
+  }
+
+  async checkAndLogDailyProgress(): Promise<void> {
+    const allProfiles = await db.select().from(profiles);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (const profile of allProfiles) {
+      const questProgress = profile.questProgress as Record<string, number>;
+      const completedTasks = Object.values(questProgress).filter(v => v >= 1).length;
+      const isDisciplined = completedTasks >= 6;
+
+      // Create immutable transcript
+      await db.insert(dailyTranscripts).values({
+        userId: profile.userId,
+        date: today,
+        questSnapshot: questProgress,
+        tasksCompleted: completedTasks,
+        isDisciplined,
+      });
+
+      // Update streaks if needed
+      if (isDisciplined) {
+        const newStreak = (profile.disciplineStreak || 0) + 1;
+        await this.updateProfile(profile.userId, {
+          disciplineStreak: newStreak,
+          totalDisciplinedDays: (profile.totalDisciplinedDays || 0) + 1,
+          longestStreak: Math.max(profile.longestStreak || 0, newStreak),
+        });
+      } else {
+        await this.updateProfile(profile.userId, { disciplineStreak: 0 });
+      }
+
+      // Reset daily progress for next day
+      await this.updateProfile(profile.userId, {
+        rewardClaimedToday: false,
+        questProgress: {
+          flow: 0, push: 0, sit: 0, squat: 0,
+          bible: 0, book: 0, meals: 0,
+          meditation: 0, journaling: 0, creation: 0
+        }
+      });
+    }
   }
 }
 

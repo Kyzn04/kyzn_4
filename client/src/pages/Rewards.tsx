@@ -1,120 +1,127 @@
-import { useProfile } from "@/hooks/use-profile";
 import { Layout } from "@/components/layout/Layout";
 import { CyberCard } from "@/components/ui/CyberCard";
 import { CyberButton } from "@/components/ui/CyberButton";
-import { useMutation } from "@tanstack/react-query";
+import { useProfile } from "@/hooks/use-profile";
+import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { Trophy, Star, Utensils, Tv, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
+import { Gift, Tv, Coffee, Trophy, CheckCircle2 } from "lucide-react";
 
 export default function Rewards() {
   const { profile, isLoading } = useProfile();
   const { toast } = useToast();
+  const [selectedReward, setSelectedReward] = useState<string | null>(null);
 
-  const claimRewardMutation = useMutation({
-    mutationFn: async (rewardType: string) => {
-      const res = await apiRequest("POST", "/api/profile/claim-reward", { type: rewardType });
+  const claimMutation = useMutation({
+    mutationFn: async (type: string) => {
+      const res = await apiRequest("POST", "/api/profile/claim-reward", { type });
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
-      toast({
-        title: "REWARD SECURED",
-        description: "SYSTEM PRIVILEGE GRANTED.",
-      });
+      toast({ title: "REWARD SECURED", description: "SYSTEM PRIVILEGE GRANTED." });
     },
-    onError: (error: Error) => {
-      toast({
-        title: "ACCESS DENIED",
-        description: error.message,
-        variant: "destructive",
-      });
+    onError: (err: any) => {
+      toast({ title: "ERROR", description: err.message, variant: "destructive" });
     }
   });
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-12 h-12 text-primary animate-spin" />
-      </div>
-    );
-  }
+  if (isLoading) return null;
 
   const questProgress = profile?.questProgress as any;
-  const completedCount = questProgress ? Object.values(questProgress).filter((v: any) => v >= 1).length : 0;
+  const completedCount = Object.values(questProgress || {}).filter((v: any) => v >= 1).length;
   const isEligible = completedCount >= 10 && !profile?.rewardClaimedToday;
 
   return (
     <Layout>
-      <div className="space-y-8 animate-in fade-in duration-700">
-        <div className="border-b border-border/50 pb-6">
-          <h1 className="text-4xl font-display font-black text-white">SYSTEM PRIVILEGES</h1>
-          <p className="text-primary font-mono text-sm tracking-widest uppercase">
-            REWARDS ARE EARNED THROUGH ABSOLUTE DISCIPLINE
-          </p>
+      <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-700">
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-display font-black text-white tracking-[0.2em]">SYSTEM PRIVILEGE</h1>
+          <p className="text-primary/60 font-mono text-xs tracking-widest uppercase">Select your daily compensation package</p>
         </div>
 
         {!isEligible ? (
-          <CyberCard variant="neon" className="text-center py-20">
-            <h2 className="text-2xl font-display text-primary mb-4">
-              {profile?.rewardClaimedToday ? "PRIVILEGE EXHAUSTED" : "INSUFFICIENT MERIT"}
-            </h2>
-            <p className="text-muted-foreground font-mono">
+          <CyberCard className="text-center py-20 border-white/10">
+            <Trophy className="w-16 h-16 text-white/10 mx-auto mb-4" />
+            <h2 className="text-xl font-display text-white/40">ACCESS RESTRICTED</h2>
+            <p className="text-white/20 font-mono text-sm mt-2">
               {profile?.rewardClaimedToday 
-                ? "COME BACK TOMORROW AFTER RESET." 
-                : `COMPLETE 10/10 DAILY QUESTS TO UNLOCK. CURRENT: ${completedCount}/10`}
+                ? "DAILY PRIVILEGE ALREADY EXHAUSTED." 
+                : `INSUFFICIENT MERIT: ${completedCount}/10 OBJECTIVES COMPLETED.`}
             </p>
           </CyberCard>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <RewardCard 
-              title="Entertainment Protocol" 
-              description="1 episode of anime" 
+              id="anime"
+              title="Digital Escape"
+              description="1 Episode of Anime"
               icon={<Tv className="w-8 h-8" />}
-              onClick={() => claimRewardMutation.mutate("anime")}
-              disabled={claimRewardMutation.isPending}
+              selected={selectedReward === "anime"}
+              onClick={() => setSelectedReward("anime")}
             />
             <RewardCard 
-              title="Nutrient Surplus" 
-              description="One food reward worth ₱200" 
-              icon={<Utensils className="w-8 h-8" />}
-              onClick={() => claimRewardMutation.mutate("food")}
-              disabled={claimRewardMutation.isPending}
+              id="food"
+              title="Nutrient Surplus"
+              description="₱200 Food Reward"
+              icon={<Coffee className="w-8 h-8" />}
+              selected={selectedReward === "food"}
+              onClick={() => setSelectedReward("food")}
             />
             <RewardCard 
-              title="Merit Acquisition" 
-              description="Discipline Points + Streak Boost" 
-              icon={<Star className="w-8 h-8" />}
-              onClick={() => claimRewardMutation.mutate("merit")}
-              disabled={claimRewardMutation.isPending}
+              id="merit"
+              title="System Authority"
+              description="+10 Discipline Points"
+              icon={<Gift className="w-8 h-8" />}
+              selected={selectedReward === "merit"}
+              onClick={() => setSelectedReward("merit")}
             />
           </div>
+        )}
+
+        {isEligible && selectedReward && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex justify-center pt-8"
+          >
+            <CyberButton 
+              size="lg" 
+              className="w-full max-w-sm"
+              onClick={() => claimMutation.mutate(selectedReward)}
+              isLoading={claimMutation.isPending}
+            >
+              CLAIM SELECTED PRIVILEGE
+            </CyberButton>
+          </motion.div>
         )}
       </div>
     </Layout>
   );
 }
 
-function RewardCard({ title, description, icon, onClick, disabled }: any) {
+function RewardCard({ id, title, description, icon, selected, onClick }: any) {
   return (
-    <CyberCard variant="neon" className="group hover-elevate transition-all">
-      <div className="flex flex-col items-center text-center p-6 space-y-4">
-        <div className="p-4 bg-primary/10 rounded-full text-primary group-hover:bg-primary group-hover:text-black transition-all">
-          {icon}
-        </div>
-        <div>
-          <h3 className="text-xl font-display font-bold text-white uppercase">{title}</h3>
-          <p className="text-sm font-mono text-primary/60 mt-1">{description}</p>
-        </div>
-        <CyberButton 
-          variant="ghost" 
-          className="w-full mt-4" 
-          onClick={onClick}
-          disabled={disabled}
-        >
-          CLAIM PRIVILEGE
-        </CyberButton>
+    <div 
+      onClick={onClick}
+      className={`relative p-6 border-2 transition-all cursor-pointer group ${
+        selected 
+          ? 'border-primary bg-primary/10 shadow-[0_0_30px_rgba(0,229,255,0.2)]' 
+          : 'border-white/10 bg-black/40 hover:border-white/20'
+      }`}
+    >
+      <div className={`mb-4 transition-colors ${selected ? 'text-primary' : 'text-white/40 group-hover:text-white/60'}`}>
+        {icon}
       </div>
-    </CyberCard>
+      <h3 className="font-display font-bold text-white mb-1 uppercase tracking-wider">{title}</h3>
+      <p className="text-[10px] font-mono text-muted-foreground uppercase">{description}</p>
+      {selected && (
+        <div className="absolute top-2 right-2">
+          <CheckCircle2 className="w-4 h-4 text-primary" />
+        </div>
+      )}
+    </div>
   );
 }

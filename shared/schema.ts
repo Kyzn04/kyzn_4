@@ -8,6 +8,23 @@ export * from "./models/auth";
 
 // === TABLE DEFINITIONS ===
 
+export const dailyTranscripts = pgTable("daily_transcripts", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id),
+  date: timestamp("date").defaultNow().notNull(),
+  questSnapshot: jsonb("quest_snapshot").notNull(),
+  tasksCompleted: integer("tasks_completed").notNull(),
+  isDisciplined: boolean("is_disciplined").default(false).notNull(), // 6/10 completed
+});
+
+export const rewardLogs = pgTable("reward_logs", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id),
+  claimedAt: timestamp("claimed_at").defaultNow().notNull(),
+  rewardType: text("reward_type").notNull(), // "anime", "food", "merit"
+  details: text("details"),
+});
+
 export const profiles = pgTable("profiles", {
   id: serial("id").primaryKey(),
   userId: text("user_id").notNull().references(() => users.id),

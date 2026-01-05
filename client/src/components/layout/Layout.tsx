@@ -23,6 +23,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
     { href: "/skills", label: "Skill Tree", icon: Network },
     { href: "/discipline", label: "Discipline", icon: Flame },
+    { href: "/streak", label: "Streak", icon: Trophy },
     { href: "/rewards", label: "Rewards", icon: Trophy },
     { href: "/profile", label: "Identity", icon: User },
   ];

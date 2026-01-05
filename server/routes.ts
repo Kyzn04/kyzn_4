@@ -164,14 +164,21 @@ export async function registerRoutes(
   app.post("/api/profile/claim-reward", async (req: any, res) => {
     if (!req.isAuthenticated()) return res.status(401).send();
     const userId = req.user.claims.sub;
-    const { type } = req.body;
+    const { type, details } = req.body;
 
     try {
-      const updated = await storage.claimReward(userId, type);
+      const updated = await storage.claimReward(userId, type, details);
       res.json(updated);
     } catch (err: any) {
       res.status(400).json({ message: err.message });
     }
+  });
+
+  app.get("/api/profile/transcripts", async (req: any, res) => {
+    if (!req.isAuthenticated()) return res.status(401).send();
+    const userId = req.user.claims.sub;
+    const transcripts = await storage.getDailyTranscripts(userId);
+    res.json(transcripts);
   });
 
   app.post(api.profile.claimRecovery.path, async (req: any, res) => {

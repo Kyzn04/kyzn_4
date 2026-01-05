@@ -57,18 +57,23 @@ export default function Dashboard() {
   });
 
   const questProgress = profile?.questProgress as any;
-  
-  const flowComplete = (questProgress?.flow || 0) >= 7;
-  const secondaryTasks = Object.entries(questProgress || {})
-    .filter(([key, val]) => key !== "flow" && (val as number) > 0);
-  const secondaryCount = secondaryTasks.length;
+  const questValues = Object.values(questProgress || {});
+  const completedTasksList = questValues.filter((v: any) => typeof v === 'number' && v >= 1);
+  const completedCount = completedTasksList.length;
 
-  const isPerfect = flowComplete && secondaryCount >= 3;
-    
-  const isSafe = (questProgress?.flow || 0) >= 4 || secondaryCount >= 2;
+  // Track secondary tasks (non-flow)
+  const secondaryCount = Object.entries(questProgress || {})
+    .filter(([key, val]) => key !== "flow" && typeof val === 'number' && val > 0).length;
+
+  const isPerfect = completedCount >= 10;
+  const isSafe = completedCount >= 6;
 
   useEffect(() => {
-    // Reward claiming handled by button, not auto-redirect
+    if (isPerfect && !profile?.rewardClaimedToday) {
+      // The user requested auto-redirect, but now says "do not lock the regular dashboard"
+      // We will provide a notification or a clear button instead of forced redirect
+      // to avoid feeling "locked"
+    }
   }, [isPerfect, profile?.rewardClaimedToday]);
 
   if (isLoading) {
@@ -175,7 +180,7 @@ export default function Dashboard() {
           {/* Daily Quest Section */}
           <CyberCard title="DAILY QUEST" variant="neon" className="relative">
             <div className="absolute top-4 right-4 text-cyan-500/50">
-              <span className="text-[10px] font-mono uppercase tracking-widest">{flowComplete ? "FLOW SECURED" : `${questProgress?.flow || 0}/7 FLOW`}</span>
+              <span className="text-[10px] font-mono uppercase tracking-widest">{completedCount}/10 TASKS</span>
             </div>
             
             {!isSafe && (
@@ -183,7 +188,7 @@ export default function Dashboard() {
                 <AlertTriangle className="text-red-500 w-5 h-5" />
                 <div className="flex-1">
                   <p className="text-red-500 text-[10px] font-mono font-bold uppercase">Punishment State Active</p>
-                  <p className="text-red-400/60 text-[8px] font-mono">FLOW PROTOCOL OR SECONDARY OBJECTIVES UNMET.</p>
+                  <p className="text-red-400/60 text-[8px] font-mono">CRITICAL FAILURE: MINIMUM {6} OBJECTIVES NOT MET.</p>
                 </div>
               </div>
             )}
@@ -235,7 +240,7 @@ export default function Dashboard() {
                      SAFE
                    </div>
                    <div className={`px-3 py-1 border text-[10px] font-mono ${isPerfect ? 'border-yellow-500/50 text-yellow-500 animate-pulse' : 'border-white/20 text-white/20'}`}>
-                     REWARD ELIGIBLE ({secondaryCount}/3 + FLOW)
+                     REWARD ELIGIBLE ({completedCount}/10)
                    </div>
                 </div>
                 <CyberButton 
