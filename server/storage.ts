@@ -133,6 +133,19 @@ export class DatabaseStorage implements IStorage {
       journaling: 1,
       creation: 1
     };
+
+    const questXp: Record<string, number> = {
+      flow: 350,
+      push: 120,
+      sit: 120,
+      squat: 110,
+      bible: 180,
+      book: 120,
+      meals: 160,
+      meditation: 90,
+      journaling: 90,
+      creation: 220
+    };
     
     if (!(quest in questMax)) throw new Error("INVALID QUEST TYPE");
 
@@ -148,28 +161,33 @@ export class DatabaseStorage implements IStorage {
     const newValue = questMap[quest];
     const updates: UpdateProfileRequest = { questProgress: questMap };
 
-    // Bonus Points Logic
+    // XP and Reward Logic
     if (newValue > prevValue) {
-      const completionDiff = mode === "complete" ? (maxValue - prevValue) : 1;
+      const isFullCompletion = newValue === maxValue && prevValue < maxValue;
       
-      // Global XP Gain (10 XP per action)
-      updates.experience = (profile.experience || 0) + (completionDiff * 10);
-      
-      // Level up logic (e.g. 100 XP per level)
-      const newXp = updates.experience;
-      updates.level = Math.floor(newXp / 100) + 1;
+      if (isFullCompletion) {
+        updates.experience = (profile.experience || 0) + (questXp[quest] || 0);
+      } else if (mode !== "complete") {
+        // Partial XP for increment? User says "10/10 completion only" for Z Coins, 
+        // but tasks have set XP. Let's award task XP only on completion of that task.
+        // Or per rep? The prompt says "Push-ups (35/35) -> 120 XP". 
+        // Usually implies finishing the set.
+      }
 
-      // Favor Points for Biblical/Reading tasks
-      if (quest === "bible" || quest === "book") {
-        updates.favorPoints = (profile.favorPoints || 0) + (completionDiff * 10);
+      // Level up logic (150 * 1.10^level)
+      if (updates.experience) {
+        let currentLevel = profile.level || 1;
+        let currentXp = updates.experience;
+        
+        const getNextLevelXp = (lvl: number) => Math.floor(150 * Math.pow(1.10, lvl));
+        
+        while (currentXp >= getNextLevelXp(currentLevel)) {
+          currentXp -= getNextLevelXp(currentLevel);
+          currentLevel++;
+        }
+        updates.level = currentLevel;
+        updates.experience = currentXp; // Store remaining XP
       }
-      
-      // Discipline for Workouts
-      if (quest === "push" || quest === "sit" || quest === "squat") {
-        updates.disciplinePoints = (profile.disciplinePoints || 0) + completionDiff;
-        updates.kaizenDis = Math.min(100, (profile.kaizenDis || 0) + 1);
-      }
-    }
     
     const updated = await this.updateProfile(userId, updates);
     return updated;

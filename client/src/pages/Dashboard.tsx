@@ -56,17 +56,18 @@ export default function Dashboard() {
     }
   });
 
-  const questProgress = profile?.questProgress as any;
-  const questValues = Object.values(questProgress || {});
-  const completedTasksList = questValues.filter((v: any) => typeof v === 'number' && v >= 1);
-  const completedCount = completedTasksList.length;
+  const getRank = (level: number) => {
+    if (level >= 121) return "S-Rank";
+    if (level >= 81) return "A-Rank";
+    if (level >= 56) return "B-Rank";
+    if (level >= 26) return "C-Rank";
+    if (level >= 11) return "D-Rank";
+    return "E-Rank";
+  };
 
-  // Track secondary tasks (non-flow)
-  const secondaryCount = Object.entries(questProgress || {})
-    .filter(([key, val]) => key !== "flow" && typeof val === 'number' && val > 0).length;
-
-  const isPerfect = completedCount >= 10;
-  const isSafe = completedCount >= 6;
+  const getNextLevelXp = (lvl: number) => Math.floor(150 * Math.pow(1.10, lvl));
+  const currentLevelXp = getNextLevelXp(profile.level);
+  const xpProgress = (profile.experience / currentLevelXp) * 100;
 
   useEffect(() => {
     if (isPerfect && !profile?.rewardClaimedToday) {
