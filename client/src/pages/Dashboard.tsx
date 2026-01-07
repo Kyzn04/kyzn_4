@@ -158,6 +158,55 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Z-Coins & Money Balance */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CyberCard className="p-4 bg-yellow-500/5 border-yellow-500/20 no-default-hover-elevate">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-yellow-500/20 rounded">
+                  <Zap className="w-4 h-4 text-yellow-500" />
+                </div>
+                <div>
+                  <p className="text-[10px] font-mono text-yellow-500/60 uppercase">Z-Coins</p>
+                  <p className="text-xl font-display font-bold text-yellow-500">{profile.zCoins || 0}</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                <input 
+                  type="number" 
+                  className="w-20 bg-black/40 border border-yellow-500/30 rounded px-2 py-1 text-xs font-mono text-yellow-500 focus:outline-none focus:border-yellow-500"
+                  value={profile.zCoins || 0}
+                  onChange={(e) => updateKaizenMutation.mutate({ zCoins: parseInt(e.target.value) || 0 })}
+                />
+                <span className="text-[8px] font-mono text-yellow-500/40 uppercase tracking-tighter">Adjust Balance</span>
+              </div>
+            </div>
+          </CyberCard>
+
+          <CyberCard className="p-4 bg-green-500/5 border-green-500/20 no-default-hover-elevate">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-green-500/20 rounded">
+                  <span className="text-lg font-bold text-green-500">₱</span>
+                </div>
+                <div>
+                  <p className="text-[10px] font-mono text-green-500/60 uppercase">Money Balance</p>
+                  <p className="text-xl font-display font-bold text-green-500">₱{profile.realMoneyBalance || 0}</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                <input 
+                  type="number" 
+                  className="w-24 bg-black/40 border border-green-500/30 rounded px-2 py-1 text-xs font-mono text-green-500 focus:outline-none focus:border-green-500"
+                  value={profile.realMoneyBalance || 0}
+                  onChange={(e) => updateKaizenMutation.mutate({ realMoneyBalance: parseInt(e.target.value) || 0 })}
+                />
+                <span className="text-[8px] font-mono text-green-500/40 uppercase tracking-tighter">Update Account</span>
+              </div>
+            </div>
+          </CyberCard>
+        </div>
+
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Core Attribute Training */}
