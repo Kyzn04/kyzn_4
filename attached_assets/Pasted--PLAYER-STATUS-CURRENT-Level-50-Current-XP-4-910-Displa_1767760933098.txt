@@ -1,0 +1,222 @@
+ PLAYER STATUS (CURRENT)
+Level: 50
+
+
+Current XP: 4,910
+
+
+Displayed Rank: C-Class Hunter
+
+
+Priority Protocol: Deep Work Flow [7/7] — COMPLETED
+
+
+
+ SHOP TAB SYSTEM — Z COINS ECONOMY
+Shop Tab
+Create a Shop Tab where the Player can purchase system advantages using a premium accountability currency called Z Coins.
+Z Coins (Core Rules)
+Z Coins are scarce and valuable
+
+
++1 Z Coin is automatically granted ONLY when the Daily Quest is completed at 10/10
+
+
+No partial rewards
+
+
+No manual editing
+
+
+Z Coins are permanent unless spent
+
+
+What Z Coins Can Be Used For
+Focus Boosts (Deep Work enhancement)
+
+
+Streak Protection (limited-use)
+
+
+Skill Resets
+
+
+Temporary XP Multipliers (capped)
+
+
+System Unlocks (advanced analytics, new tabs, elite quests)
+
+
+❌ Z Coins can never be used for entertainment, leisure, or dopamine-based rewards.
+ They exist solely to amplify growth and discipline.
+
+ DAILY QUEST SYSTEM & XP DISTRIBUTION
+XP rewards are calibrated to reflect effort, leverage, and long-term value.
+ A perfect day progresses you — it does not skip levels.
+ PRIORITY QUEST
+Deep Work Flow Protocol (7/7)
+ → 350 XP
+ (High cognitive load, compounding returns)
+
+ WORKOUT OBJECTIVES
+Moderate XP. Physical effort builds consistency, not instant power.
+Push-ups (35/35) → 120 XP
+
+
+Sit-ups (35/35) → 120 XP
+
+
+Squats (30/30) → 110 XP
+
+
+Workout Total: 350 XP
+
+ SYSTEM MAINTENANCE (STABILITY TASKS)
+Prevents decay and maintains system integrity.
+Bible Reading (3 chapters) → 180 XP
+
+
+Reading (5 pages) → 120 XP
+
+
+Nutrition (4 meals) → 160 XP
+
+
+Meditation (1/1) → 90 XP
+
+
+Journaling (1/1) → 90 XP
+
+
+Maintenance Total: 640 XP
+
+ CREATION OUTPUT
+High-leverage output-based task.
+Creation Output (1/1) → 220 XP
+
+
+
+ TOTAL XP — PERFECT DAY
+Total Daily XP: 1,560 XP
+Design intent:
+No level skipping
+
+
+Consistency > intensity
+
+
+Missing days meaningfully slows progress
+
+
+
+ XP SCALING SYSTEM (UPDATED — HALF EASIER)
+ OFFICIAL XP FORMULA (LOCKED)
+XP to next level = 150 × (1.10 ^ Current Level)
+
+Why this works:
+Sustainable early–mid progression
+
+
+Still exponential
+
+
+Difficulty increases naturally with level
+
+
+No late-game collapse or burnout
+
+
+
+ LEVEL 50 → 51 (REFERENCE)
+XP required: ≈ 17,600 XP
+
+
+Current XP: 4,910 XP
+
+
+Remaining XP: ≈ 12,690 XP
+
+
+~8 perfect days on average
+
+
+
+ HUNTER RANK SYSTEM
+Ranks reflect long-term discipline, not spikes.
+E Rank: Levels 1–10
+
+
+D Rank: Levels 11–25
+
+
+C Rank: Levels 26–55
+
+
+B Rank: Levels 56–80
+
+
+A Rank: Levels 81–120
+
+
+S Rank: Level 121+
+
+
+Rank-ups are milestones, not cosmetic labels.
+
+ S-CLASS HUNTER REQUIREMENT (INTENTIONALLY MASSIVE)
+To reach S-Class, the Player must achieve:
+Level 121
+
+
+Sustained consistency (no chronic XP decay)
+
+
+Completion of high-difficulty weeks
+
+
+Long-term system integrity
+
+
+Expected timeline: months to years.
+ This is mastery, not speedrunning.
+
+ XP DECAY & ADAPTIVE DIFFICULTY
+Missed Daily Quest → Reduced XP gain next day
+
+
+Repeated failures → Temporary XP suppression
+
+
+Long streaks → XP stabilization (not boosts)
+
+
+As levels increase:
+XP per level increases
+
+
+Quotas may scale slightly
+
+
+System tolerance decreases
+
+
+Power demands responsibility.
+
+CORE DESIGN PHILOSOPHY (NON-NEGOTIABLE)
+Progress mirrors real effort
+
+
+No artificial rewards
+
+
+No XP inflation
+
+
+Consistency beats motivation
+
+
+Discipline builds power
+
+
+This system exists to forge an S-Class life, not simulate one.
+

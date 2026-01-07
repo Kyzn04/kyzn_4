@@ -1,0 +1,215 @@
+SHOP
+
+🛒 SHOP TAB — Z COIN INVENTORY SYSTEM
+(Canonical v1.0)
+Z Coins are earned only by completing Daily Quest 10/10
+ → 1 Z Coin per perfect day
+No farming. No shortcuts.
+
+🧠 CATEGORY I — FOCUS & PERFORMANCE (CORE)
+🔮 Focus Surge
+Cost: 2 Z Coins
+ Effect:
++15% XP from Deep Work Flow only
+
+
+Duration: 1 day
+
+
+Cooldown: 3 days
+
+
+Why:
+ Rewards intentional high-cognition days without breaking XP balance.
+
+🕯 Flow Anchor
+Cost: 4 Z Coins
+ Effect:
+Prevents XP decay from 1 missed task (non-priority)
+
+
+Does NOT protect against skipping Deep Work
+
+
+Cap: 2 uses per month
+Why:
+ Allows realism without enabling laziness.
+
+🛡 CATEGORY II — STREAK & SYSTEM PROTECTION
+🛡 Streak Seal
+Cost: 3 Z Coins
+ Effect:
+Preserves Daily Quest streak once
+
+
+Automatically consumed on failure
+
+
+Restrictions:
+Cannot be stacked
+
+
+Cannot be used two days in a row
+
+
+Why:
+ Emergency buffer, not a habit.
+
+⏳ Temporal Grace
+Cost: 5 Z Coins
+ Effect:
+Converts a failed day into a Neutral Day
+
+
+No XP gain, no XP loss
+
+
+Hard Limit:
+1 per 30 days
+
+
+Why:
+ This is mercy — and mercy must be rare.
+
+🧬 CATEGORY III — SKILL & PROGRESSION CONTROL
+🧬 Skill Reallocation Token
+Cost: 6 Z Coins
+ Effect:
+Redistribute XP weight percentages between task categories
+
+
+Total daily XP remains capped at 1,560
+
+
+Cooldown:
+Once every 21 days
+
+
+Why:
+ Lets your system evolve as your life season changes.
+
+📜 Protocol Override
+Cost: 8 Z Coins
+ Effect:
+Temporarily modify one task quota
+
+
+Example: reduce Deep Work from 7 → 5 for 3 days
+
+
+XP scales down proportionally
+
+
+Why:
+ Strategic flexibility without cheating the system.
+
+⚔️ CATEGORY IV — ADVANCED / ELITE ITEMS (MID–HIGH GAME)
+⚔️ Boss Key: Discipline Trial
+Cost: 10 Z Coins
+ Unlocks:
+7-day Boss Week
+
+
++25% XP on completion
+
+
+Failure causes XP suppression for 3 days
+
+
+Rank Requirement: B-Class+
+Why:
+ High risk, high respect. Not mandatory.
+
+💠 Z-Gem Resonator
+Cost: 12 Z Coins
+ Effect:
+Converts 10 Z Coins → permanent passive buff
+
+
+Choose ONE:
+
+
++3% XP from Creation Output
+
+
++3% XP from Deep Work
+
+
++3% Workout XP
+
+
+Permanent Cap:
+Max 2 resonators total
+
+
+Why:
+ Long-term power, extremely limited.
+
+🏛 CATEGORY V — SYSTEM UNLOCKS (META PROGRESSION)
+📊 Advanced Analytics Module
+Cost: 5 Z Coins
+ Unlocks:
+XP trend graphs
+
+
+Streak heatmaps
+
+
+Failure pattern detection
+
+
+One-time purchase
+
+🧠 Hunter Codex
+Cost: 7 Z Coins
+ Unlocks:
+Passive skill descriptions
+
+
+Rank-based bonuses
+
+
+Boss mechanics transparency
+
+
+Rank Requirement: C-Class+
+
+🚫 ABSOLUTE SHOP RULES (NON-NEGOTIABLE)
+Z Coins cannot be refunded
+
+
+No item gives raw XP directly
+
+
+No item bypasses Deep Work entirely
+
+
+No stacking exploit paths
+
+
+Scarcity > convenience
+
+
+If a purchase removes discipline, it does not belong in the shop.
+
+⚖️ ECONOMY BALANCE CHECK
+Average Z Coin gain: ~20–25/month
+
+
+Mid-tier items require planning
+
+
+Elite items require weeks of consistency
+
+
+Permanent buffs are rare by design
+
+
+This keeps:
+Progress meaningful
+
+
+Choices painful (in a good way)
+
+
+Power earned, not bought
