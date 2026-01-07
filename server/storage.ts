@@ -215,6 +215,7 @@ export class DatabaseStorage implements IStorage {
 
     if (type === "merit") {
       updates.disciplinePoints = (profile.disciplinePoints || 0) + 10;
+      updates.disciplineStreak = (profile.disciplineStreak || 0) + 1; // Reward adds to streak as per user request
     }
     
     // Log reward

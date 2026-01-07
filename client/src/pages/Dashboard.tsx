@@ -70,11 +70,9 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (isPerfect && !profile?.rewardClaimedToday) {
-      // The user requested auto-redirect, but now says "do not lock the regular dashboard"
-      // We will provide a notification or a clear button instead of forced redirect
-      // to avoid feeling "locked"
+      setLocation("/rewards");
     }
-  }, [isPerfect, profile?.rewardClaimedToday]);
+  }, [isPerfect, profile?.rewardClaimedToday, setLocation]);
 
   if (isLoading) {
     return (

@@ -54,6 +54,8 @@ export const profiles = pgTable("profiles", {
   longestStreak: integer("longest_streak").default(0).notNull(),
   totalDisciplinedDays: integer("total_disciplined_days").default(0).notNull(),
   rewardClaimedToday: boolean("reward_claimed_today").default(false).notNull(),
+  zCoins: integer("z_coins").default(0).notNull(),
+  realMoneyBalance: integer("real_money_balance").default(0).notNull(),
   // Quest Progress
   questProgress: jsonb("quest_progress").default({ 
     flow: 0,
