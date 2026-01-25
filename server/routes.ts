@@ -174,6 +174,35 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/shop/buy", async (req: any, res) => {
+    if (!req.isAuthenticated()) return res.status(401).send();
+    const userId = req.user.claims.sub;
+    const { itemId } = req.body;
+    try {
+      const profile = await storage.getProfile(userId);
+      if (!profile) return res.status(404).json({ message: "Profile not found" });
+
+      const items: Record<string, number> = {
+        focus_surge: 2,
+        streak_seal: 3,
+        flow_anchor: 4,
+        temporal_grace: 5
+      };
+
+      const cost = items[itemId];
+      if (!cost) return res.status(400).json({ message: "Invalid item" });
+      if ((profile.zCoins || 0) < cost) return res.status(400).json({ message: "Insufficient Z-Coins" });
+
+      const updated = await storage.updateProfile(userId, {
+        zCoins: (profile.zCoins || 0) - cost
+      });
+
+      res.json(updated);
+    } catch (e: any) {
+      res.status(400).json({ message: e.message });
+    }
+  });
+
   app.get("/api/profile/transcripts", async (req: any, res) => {
     if (!req.isAuthenticated()) return res.status(401).send();
     const userId = req.user.claims.sub;

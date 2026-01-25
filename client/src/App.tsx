@@ -10,6 +10,7 @@ import Dashboard from "@/pages/Dashboard";
 import SkillTree from "@/pages/SkillTree";
 import ProfilePage from "@/pages/Profile";
 import RewardsPage from "@/pages/Rewards";
+import ShopPage from "@/pages/Shop";
 import DisciplinePage from "@/pages/Discipline";
 import DisciplineStreakPage from "@/pages/DisciplineStreak";
 import Landing from "@/pages/Landing";
@@ -65,6 +66,10 @@ function Router() {
 
       <Route path="/rewards">
         {() => <ProtectedRoute component={RewardsPage} />}
+      </Route>
+
+      <Route path="/shop">
+        {() => <ProtectedRoute component={ShopPage} />}
       </Route>
 
       <Route path="/discipline">

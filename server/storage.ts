@@ -188,6 +188,7 @@ export class DatabaseStorage implements IStorage {
         updates.level = currentLevel;
         updates.experience = currentXp; // Store remaining XP
       }
+    }
     
     const updated = await this.updateProfile(userId, updates);
     return updated;

@@ -9,7 +9,8 @@ import {
   Menu,
   X,
   Trophy,
-  Flame
+  Flame,
+  ShoppingCart
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -25,6 +26,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     { href: "/discipline", label: "Discipline", icon: Flame },
     { href: "/streak", label: "Streak", icon: Trophy },
     { href: "/rewards", label: "Rewards", icon: Trophy },
+    { href: "/shop", label: "Shop", icon: ShoppingCart },
     { href: "/profile", label: "Identity", icon: User },
   ];
 

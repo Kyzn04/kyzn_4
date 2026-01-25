@@ -56,6 +56,14 @@ export default function Dashboard() {
     }
   });
 
+  const questProgress = profile?.questProgress as any;
+  const questValues = Object.values(questProgress || {});
+  const completedTasksList = questValues.filter((v: any) => typeof v === 'number' && v >= 1);
+  const completedCount = completedTasksList.length;
+
+  const isPerfect = completedCount >= 10;
+  const isSafe = completedCount >= 6;
+
   const getRank = (level: number) => {
     if (level >= 121) return "S-Rank";
     if (level >= 81) return "A-Rank";
@@ -66,8 +74,8 @@ export default function Dashboard() {
   };
 
   const getNextLevelXp = (lvl: number) => Math.floor(150 * Math.pow(1.10, lvl));
-  const currentLevelXp = getNextLevelXp(profile.level);
-  const xpProgress = (profile.experience / currentLevelXp) * 100;
+  const currentLevelXp = getNextLevelXp(profile?.level || 1);
+  const xpProgress = ((profile?.experience || 0) / currentLevelXp) * 100;
 
   useEffect(() => {
     if (isPerfect && !profile?.rewardClaimedToday) {
@@ -122,14 +130,42 @@ export default function Dashboard() {
     <Layout>
       <div className="space-y-8 animate-in fade-in duration-700 slide-in-from-bottom-4">
         {/* Header Section */}
-        <div className="flex flex-col md:flex-row justify-between items-end gap-4 border-b border-border/50 pb-6">
+            <div className="flex flex-col md:flex-row justify-between items-end gap-4 border-b border-border/50 pb-6">
           <div>
             <h1 className="text-4xl md:text-5xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/50 mb-2">
               DASHBOARD
             </h1>
-            <p className="text-primary font-mono text-sm tracking-widest uppercase">
-              RANK: <span className="text-white font-bold">{profile.currentTitle}</span> | LVL: <span className="text-white font-bold">{profile.level}</span>
-            </p>
+            <div className="flex items-center gap-3">
+              <div className={`px-2 py-0.5 rounded text-[10px] font-bold tracking-tighter border ${
+                getRank(profile.level).includes('S') ? 'bg-red-500/20 border-red-500 text-red-500 animate-pulse' :
+                getRank(profile.level).includes('A') ? 'bg-orange-500/20 border-orange-500 text-orange-500' :
+                getRank(profile.level).includes('B') ? 'bg-purple-500/20 border-purple-500 text-purple-500' :
+                getRank(profile.level).includes('C') ? 'bg-blue-500/20 border-blue-500 text-blue-500' :
+                'bg-zinc-500/20 border-zinc-500 text-zinc-400'
+              }`}>
+                {getRank(profile.level)}
+              </div>
+              <p className="text-primary font-mono text-sm tracking-widest uppercase">
+                CLASS: <span className="text-white font-bold">{profile.currentTitle}</span> | LVL: <span className="text-white font-bold">{profile.level}</span>
+              </p>
+            </div>
+            {/* XP Progress Bar */}
+            <div className="mt-4 w-64">
+              <div className="flex justify-between items-end mb-1">
+                <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-tighter">System Progress</span>
+                <span className="text-[10px] font-mono text-primary">{Math.floor(xpProgress)}%</span>
+              </div>
+              <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
+                <div 
+                  className="h-full bg-primary transition-all duration-1000 ease-out"
+                  style={{ width: `${xpProgress}%` }}
+                />
+              </div>
+              <div className="flex justify-between mt-1">
+                <span className="text-[8px] font-mono text-muted-foreground uppercase">{profile.experience} XP</span>
+                <span className="text-[8px] font-mono text-muted-foreground uppercase">{currentLevelXp} XP REQ</span>
+              </div>
+            </div>
           </div>
           <div className="text-right">
             <div className="flex items-center gap-4 mb-1">
