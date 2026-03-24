@@ -2,6 +2,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import { storage } from "./storage";
 
 const app = express();
 const httpServer = createServer(app);
@@ -93,6 +94,34 @@ app.use((req, res, next) => {
     },
     () => {
       log(`serving on port ${port}`);
+      scheduleDailyReset();
     },
   );
 })();
+
+function scheduleDailyReset() {
+  const now = new Date();
+  const next6am = new Date();
+  next6am.setHours(6, 0, 0, 0);
+
+  // If 6am has already passed today, schedule for tomorrow
+  if (now >= next6am) {
+    next6am.setDate(next6am.getDate() + 1);
+  }
+
+  const msUntil6am = next6am.getTime() - now.getTime();
+  const hoursUntil = Math.round(msUntil6am / 1000 / 60 / 60 * 10) / 10;
+  log(`Daily quest reset scheduled in ${hoursUntil}h (at 06:00)`);
+
+  setTimeout(async () => {
+    try {
+      log("Running daily quest reset & transcript log...");
+      await storage.checkAndLogDailyProgress();
+      log("Daily quest reset complete.");
+    } catch (err) {
+      log(`Daily reset error: ${err}`);
+    }
+    // Re-schedule for the next day
+    scheduleDailyReset();
+  }, msUntil6am);
+}
