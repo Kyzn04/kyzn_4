@@ -14,24 +14,59 @@ export async function registerRoutes(
   await setupAuth(app);
   registerAuthRoutes(app);
 
-  // Helper: Evolution Logic
-  function calculateEvolution(profile: any) {
-    let title = profile.currentTitle;
-    let cls = profile.currentClass;
+  // Helper: Rank from stat value
+  function getStatRank(value: number): string {
+    if (value >= 121) return "S";
+    if (value >= 81)  return "A";
+    if (value >= 56)  return "B";
+    if (value >= 26)  return "C";
+    if (value >= 11)  return "D";
+    return "E";
+  }
 
+  // Helper: Evolution Logic — title/class based on dominant stat + rank
+  function calculateEvolution(profile: any) {
     const { intelligence: int, strength: str, charisma: cha, sense: sen, agility: agi, vitality: vit } = profile;
 
-    // Engineering Authority (INT + SEN)
-    if (int > 20) title = "Novice Tinkerer";
-    if (int > 50) title = "Apprentice Technician";
-    if (int > 100 && sen > 80) title = "Electrical Engineer";
-    if (int > 300) title = "Systems Architect";
-    if (int > 500) title = "Iron Monarch"; // Hypothetical top tier
+    const statMap: Record<string, { value: number; category: string; titles: Record<string, string> }> = {
+      int: {
+        value: int,
+        category: "Engineering Authority",
+        titles: { E: "Novice Tinkerer", D: "Apprentice Technician", C: "Field Engineer", B: "Systems Specialist", A: "Lead Engineer", S: "Engineering Polymath" },
+      },
+      str: {
+        value: str,
+        category: "Apex Predator",
+        titles: { E: "Untested Brawler", D: "Iron Trainee", C: "Physical Operator", B: "Combat Veteran", A: "Apex Fighter", S: "Iron Monarch" },
+      },
+      cha: {
+        value: cha,
+        category: "Sovereign Leader",
+        titles: { E: "Silent Observer", D: "Emerging Voice", C: "Social Tactician", B: "Influential Leader", A: "Sovereign Commander", S: "Legendary Sovereign" },
+      },
+      sen: {
+        value: sen,
+        category: "Creative Architect",
+        titles: { E: "Raw Observer", D: "Pattern Finder", C: "Design Apprentice", B: "Creative Operator", A: "Master Architect", S: "Visionary Creator" },
+      },
+      agi: {
+        value: agi,
+        category: "Tactical Phantom",
+        titles: { E: "Slow Starter", D: "Quick Learner", C: "Swift Operator", B: "Tactical Ghost", A: "Phantom Runner", S: "Void Dasher" },
+      },
+      vit: {
+        value: vit,
+        category: "Undying Fortress",
+        titles: { E: "Fragile Frame", D: "Hardened Shell", C: "Resilient Core", B: "Living Fortress", A: "Immortal Wall", S: "Undying Titan" },
+      },
+    };
 
-    // Simple logic for class detection based on highest stats
-    if (int > 20 && sen > 20) cls = "Engineering Authority";
-    // Add more logic for other classes based on the user's text file rules if needed
-    // For now, let's keep it simple as per the snippet provided.
+    // Find dominant stat (highest value)
+    const dominant = Object.values(statMap).reduce((best, s) => s.value > best.value ? s : best, Object.values(statMap)[0]);
+    const rank = getStatRank(dominant.value);
+
+    const title = dominant.titles[rank] || "Unawakened";
+    const cls = dominant.category;
 
     return { title, cls };
   }

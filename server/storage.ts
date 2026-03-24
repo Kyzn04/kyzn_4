@@ -42,16 +42,34 @@ export class DatabaseStorage implements IStorage {
     const [profile] = await db.select().from(profiles).where(eq(profiles.userId, userId));
     if (!profile) throw new Error("Profile not found");
 
-    // Evolution Logic
-    let evolvedTitle = profile.currentTitle;
-    const finalStats = { ...profile, ...updates };
-    
-    if (finalStats.intelligence > 100) evolvedTitle = "Electrical Engineer";
-    else if (finalStats.intelligence > 50 && (finalStats.sense || 0) > 30) evolvedTitle = "Apprentice Technician";
-    else if (finalStats.strength > 100 && (finalStats.vitality || 0) > 100) evolvedTitle = "Iron Monarch";
-    
+    // Rank-based Evolution Logic
+    const f = { ...profile, ...updates } as any;
+
+    const getRank = (v: number) => {
+      if (v >= 121) return "S";
+      if (v >= 81)  return "A";
+      if (v >= 56)  return "B";
+      if (v >= 26)  return "C";
+      if (v >= 11)  return "D";
+      return "E";
+    };
+
+    const statMap = [
+      { value: f.intelligence || 0, category: "Engineering Authority", titles: { E: "Novice Tinkerer", D: "Apprentice Technician", C: "Field Engineer", B: "Systems Specialist", A: "Lead Engineer", S: "Engineering Polymath" } },
+      { value: f.strength || 0,     category: "Apex Predator",         titles: { E: "Untested Brawler", D: "Iron Trainee", C: "Physical Operator", B: "Combat Veteran", A: "Apex Fighter", S: "Iron Monarch" } },
+      { value: f.charisma || 0,     category: "Sovereign Leader",      titles: { E: "Silent Observer", D: "Emerging Voice", C: "Social Tactician", B: "Influential Leader", A: "Sovereign Commander", S: "Legendary Sovereign" } },
+      { value: f.sense || 0,        category: "Creative Architect",    titles: { E: "Raw Observer", D: "Pattern Finder", C: "Design Apprentice", B: "Creative Operator", A: "Master Architect", S: "Visionary Creator" } },
+      { value: f.agility || 0,      category: "Tactical Phantom",      titles: { E: "Slow Starter", D: "Quick Learner", C: "Swift Operator", B: "Tactical Ghost", A: "Phantom Runner", S: "Void Dasher" } },
+      { value: f.vitality || 0,     category: "Undying Fortress",      titles: { E: "Fragile Frame", D: "Hardened Shell", C: "Resilient Core", B: "Living Fortress", A: "Immortal Wall", S: "Undying Titan" } },
+    ];
+
+    const dominant = statMap.reduce((best, s) => s.value > best.value ? s : best, statMap[0]);
+    const rank = getRank(dominant.value);
+    const evolvedTitle = (dominant.titles as any)[rank] || "Unawakened";
+    const evolvedClass = dominant.category;
+
     const [updated] = await db.update(profiles)
-      .set({ ...updates, currentTitle: evolvedTitle })
+      .set({ ...updates, currentTitle: evolvedTitle, currentClass: evolvedClass })
       .where(eq(profiles.userId, userId))
       .returning();
     return updated;

@@ -45,7 +45,25 @@ Preferred communication style: Simple, everyday language.
 - **UserSkills**: Junction table tracking unlocked skills per user
 
 ### Evolution System
-Stats automatically trigger title/class evolution when thresholds are met (e.g., INT > 100 + SEN > 80 = "Electrical Engineer"). Logic lives in `server/routes.ts` and `server/storage.ts`.
+Stats automatically trigger title/class evolution based on the dominant stat and its E→S rank. The rank-based title system maps each stat category to 6 titles (E through S rank). Thresholds: E(1-10), D(11-25), C(26-55), B(56-80), A(81-120), S(121+). Logic lives in `server/routes.ts` and `server/storage.ts`.
+
+### Stat Categories & Titles
+- **INT → Engineering Authority**: Novice Tinkerer → Apprentice Technician → Field Engineer → Systems Specialist → Lead Engineer → Engineering Polymath
+- **STR → Apex Predator**: Untested Brawler → Iron Trainee → Physical Operator → Combat Veteran → Apex Fighter → Iron Monarch
+- **CHA → Sovereign Leader**: Silent Observer → Emerging Voice → Social Tactician → Influential Leader → Sovereign Commander → Legendary Sovereign
+- **SEN → Creative Architect**: Raw Observer → Pattern Finder → Design Apprentice → Creative Operator → Master Architect → Visionary Creator
+- **AGI → Tactical Phantom**: Slow Starter → Quick Learner → Swift Operator → Tactical Ghost → Phantom Runner → Void Dasher
+- **VIT → Undying Fortress**: Fragile Frame → Hardened Shell → Resilient Core → Living Fortress → Immortal Wall → Undying Titan
+
+### Pages
+- `/` Dashboard: Core stats, daily quests, Z-Coins, money balance
+- `/status` Player Status: E→S rank display per stat, overall rank badge, dominant class path, XP bar
+- `/skills` Skill Tree: Unlockable skills organized by category
+- `/discipline` Discipline tracking
+- `/streak` Streak history
+- `/rewards` Reward claiming (requires 10/10 quests)
+- `/shop` Shop (Z-Coins purchases: Focus Surge, Streak Seal, Flow Anchor, Temporal Grace)
+- `/profile` Identity/profile editing
 
 ## External Dependencies
 

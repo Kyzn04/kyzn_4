@@ -10,7 +10,8 @@ import {
   X,
   Trophy,
   Flame,
-  ShoppingCart
+  ShoppingCart,
+  BarChart2
 } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { href: "/", label: "Dashboard", icon: LayoutDashboard },
+    { href: "/status", label: "Player Status", icon: BarChart2 },
     { href: "/skills", label: "Skill Tree", icon: Network },
     { href: "/discipline", label: "Discipline", icon: Flame },
     { href: "/streak", label: "Streak", icon: Trophy },

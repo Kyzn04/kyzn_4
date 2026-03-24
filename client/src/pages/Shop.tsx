@@ -114,7 +114,7 @@ export default function Shop() {
               <div className="p-6 pt-0 mt-auto">
                 <CyberButton 
                   className="w-full" 
-                  variant={(profile?.zCoins || 0) >= item.cost ? "primary" : "outline"}
+                  variant={(profile?.zCoins || 0) >= item.cost ? "primary" : "ghost"}
                   disabled={buyMutation.isPending || (profile?.zCoins || 0) < item.cost}
                   onClick={() => buyMutation.mutate(item)}
                 >

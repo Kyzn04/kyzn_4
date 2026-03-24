@@ -13,6 +13,7 @@ import RewardsPage from "@/pages/Rewards";
 import ShopPage from "@/pages/Shop";
 import DisciplinePage from "@/pages/Discipline";
 import DisciplineStreakPage from "@/pages/DisciplineStreak";
+import PlayerStatus from "@/pages/PlayerStatus";
 import Landing from "@/pages/Landing";
 import NotFound from "@/pages/not-found";
 
@@ -78,6 +79,10 @@ function Router() {
 
       <Route path="/streak">
         {() => <ProtectedRoute component={DisciplineStreakPage} />}
+      </Route>
+
+      <Route path="/status">
+        {() => <ProtectedRoute component={PlayerStatus} />}
       </Route>
 
       <Route component={NotFound} />
