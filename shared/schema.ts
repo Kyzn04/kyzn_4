@@ -69,6 +69,12 @@ export const profiles = pgTable("profiles", {
     journaling: 0,
     creation: 0
   }).notNull(),
+  // Identity
+  username: text("username"),
+  displayName: text("display_name"),
+  gender: text("gender"),
+  avatarUrl: text("avatar_url"),
+  onboardingComplete: boolean("onboarding_complete").default(false).notNull(),
   // Meta
   currentTitle: text("current_title").default("Unawakened").notNull(),
   currentClass: text("current_class").default("Civilian").notNull(),

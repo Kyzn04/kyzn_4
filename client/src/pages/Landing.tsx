@@ -1,38 +1,27 @@
 import { CyberButton } from "@/components/ui/CyberButton";
-import { ShieldCheck, UserPlus, LogIn, Mail, User, Cpu, Network, Zap } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/hooks/use-auth";
-import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-
-const authSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  email: z.string().email("Invalid email address"),
-});
-
-type AuthValues = z.infer<typeof authSchema>;
+import { Zap } from "lucide-react";
 
 export default function Landing() {
-  const [phase, setPhase] = useState<"initial" | "auth" | "activating" | "access">("initial");
+  const [phase, setPhase] = useState<"boot" | "ready" | "activating" | "access">("boot");
   const [messages, setMessages] = useState<string[]>([]);
   const { user } = useAuth();
-  
-  const form = useForm<AuthValues>({
-    resolver: zodResolver(authSchema),
-    defaultValues: { username: "", email: "" },
-  });
 
   const systemLogs = [
-    "K.A.I.Z.E.N. CORE INITIALIZING...",
-    "NEURAL SYNC ESTABLISHED...",
+    "KAIOS CORE v2.0 INITIALIZING...",
+    "NEURAL SYNC PROTOCOLS ACTIVE...",
     "DISCIPLINE ENGINE ONLINE...",
     "BIOMETRIC ARCHIVE SCAN COMPLETE...",
-    "K.A.I.Z.E.N. SYSTEM ACCESSIBLE."
+    "IDENTITY MATRIX SYNCHRONIZED...",
+    "KAIOS SYSTEM ACCESSIBLE."
   ];
+
+  useEffect(() => {
+    const t = setTimeout(() => setPhase("ready"), 800);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     if (phase === "activating") {
@@ -43,44 +32,37 @@ export default function Landing() {
           i++;
         } else {
           clearInterval(interval);
-          setTimeout(() => setPhase("access"), 1000);
+          setTimeout(() => setPhase("access"), 800);
         }
-      }, 800);
+      }, 600);
       return () => clearInterval(interval);
     }
   }, [phase]);
 
-  const handleAuth = async () => {
-    setPhase("activating");
-  };
-
-  const finalizeLogin = () => {
-    window.location.href = "/api/login";
-  };
+  const handleActivate = () => setPhase("activating");
+  const handleEnter = () => { window.location.href = "/api/login"; };
 
   if (user) {
     return (
-      <div className="min-h-screen bg-[#020202] flex flex-col items-center justify-center relative overflow-hidden font-mono">
+      <div className="min-h-screen bg-[#020202] flex flex-col items-center justify-center relative overflow-hidden">
         <div className="absolute inset-0 bg-[linear-gradient(rgba(0,229,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,229,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
-        
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="relative z-10 text-center space-y-12"
+          className="relative z-10 text-center space-y-10"
         >
-          <div className="relative group">
-            <div className="absolute -inset-4 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-all duration-700" />
-            <div className="relative p-12 rounded-full border-2 border-primary/50 bg-black/40 shadow-[0_0_60px_rgba(0,229,255,0.3)]">
-              <Cpu className="w-24 h-24 text-primary animate-pulse" />
+          <div className="space-y-2">
+            <h1 className="font-brand text-7xl tracking-[0.2em] text-white drop-shadow-[0_0_30px_rgba(0,229,255,0.4)]">
+              KAIOS
+            </h1>
+            <p className="text-primary/60 font-mono tracking-[0.5em] text-xs uppercase">System Status: Active</p>
+          </div>
+          <div className="p-1 border border-primary/20 bg-primary/5 inline-block">
+            <div className="px-6 py-3 font-mono text-sm text-white/60 uppercase tracking-widest">
+              Welcome back, <span className="text-primary font-bold">{user.firstName}</span>
             </div>
           </div>
-          
-          <div className="space-y-4">
-            <h1 className="text-5xl font-display font-black tracking-[0.3em] text-white">WELCOME, {user.firstName?.toUpperCase()}</h1>
-            <p className="text-primary/60 tracking-[0.5em] text-xs">SYSTEM STATUS: READY</p>
-          </div>
-
-          <CyberButton size="lg" variant="primary" onClick={() => window.location.href = "/"} className="w-72 h-14 text-lg">
+          <CyberButton size="lg" variant="primary" onClick={() => window.location.href = "/"} className="w-64 h-14 text-base">
             RESUME PROTOCOL
           </CyberButton>
         </motion.div>
@@ -89,158 +71,141 @@ export default function Landing() {
   }
 
   return (
-    <div className="min-h-screen bg-[#020202] flex flex-col items-center justify-center relative overflow-hidden font-mono">
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,229,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,229,255,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,229,255,0.1)_0%,transparent_70%)]" />
-      
+    <div className="min-h-screen bg-[#020202] flex flex-col items-center justify-center relative overflow-hidden">
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,229,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(0,229,255,0.025)_1px,transparent_1px)] bg-[size:40px_40px]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_60%_50%,rgba(0,229,255,0.08)_0%,transparent_60%)]" />
+
       <AnimatePresence mode="wait">
-        {phase === "initial" && (
-          <motion.div 
-            key="initial"
-            initial={{ opacity: 0, y: 20 }}
+        {phase === "boot" && (
+          <motion.div key="boot" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="relative z-10 text-center">
+            <div className="font-brand text-2xl text-primary/30 tracking-[0.5em] animate-pulse">BOOTING...</div>
+          </motion.div>
+        )}
+
+        {phase === "ready" && (
+          <motion.div
+            key="ready"
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 1.1 }}
-            className="relative z-10 text-center space-y-12"
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.6 }}
+            className="relative z-10 text-center space-y-16"
           >
-            <div className="relative inline-block group">
-              <motion.div 
-                animate={{ rotate: -360 }}
-                transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-                className="absolute -inset-8 border border-primary/10 rounded-full"
-              />
-              <motion.div 
-                animate={{ rotate: 360 }}
-                transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                className="absolute -inset-4 border-2 border-primary/30 rounded-full"
-              />
-              <div className="relative p-12 rounded-full border-2 border-primary bg-black shadow-[0_0_80px_rgba(0,229,255,0.4)] transition-all duration-500 group-hover:shadow-[0_0_100px_rgba(0,229,255,0.6)]">
-                <Network className="w-28 h-28 text-primary" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                   <Zap className="text-white w-8 h-8 opacity-0 group-hover:opacity-100 transition-opacity animate-pulse" />
+            {/* Logo block */}
+            <div className="space-y-6">
+              {/* Animated corner rings */}
+              <div className="relative inline-flex items-center justify-center">
+                <motion.div
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                  className="absolute w-56 h-56 border border-primary/10 rounded-full"
+                />
+                <motion.div
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+                  className="absolute w-40 h-40 border border-primary/20 rounded-full"
+                />
+                <div className="relative z-10 w-28 h-28 border-2 border-primary bg-black/80 flex items-center justify-center shadow-[0_0_60px_rgba(0,229,255,0.35)]">
+                  <Zap className="w-14 h-14 text-primary" />
+                </div>
+              </div>
+
+              {/* Brand name */}
+              <div>
+                <h1 className="font-brand text-8xl md:text-9xl tracking-[0.15em] text-white drop-shadow-[0_0_40px_rgba(0,229,255,0.5)] leading-none">
+                  KAIOS
+                </h1>
+                <div className="mt-3 flex items-center justify-center gap-3">
+                  <div className="h-px flex-1 max-w-16 bg-primary/30" />
+                  <p className="text-primary/60 font-mono tracking-[0.6em] text-xs uppercase">Life Operating System</p>
+                  <div className="h-px flex-1 max-w-16 bg-primary/30" />
                 </div>
               </div>
             </div>
 
+            {/* CTA */}
             <div className="space-y-4">
-              <h1 className="text-6xl md:text-8xl font-display font-black tracking-[0.25em] text-white drop-shadow-[0_0_20px_rgba(0,229,255,0.5)]">
-                K.A.I.Z.E.N.
-              </h1>
-              <p className="text-primary/70 font-mono tracking-[0.8em] text-sm md:text-base uppercase ml-4">System Protocol v1.0</p>
-            </div>
-
-            <div className="pt-8">
-              <CyberButton size="lg" variant="primary" onClick={() => setPhase("auth")} className="w-80 h-14 text-lg border-primary/50 hover:shadow-[0_0_40px_rgba(0,229,255,0.3)]">
-                ACTIVATE CORE
+              <CyberButton size="lg" variant="primary" onClick={handleActivate}
+                className="w-72 h-14 text-base shadow-[0_0_30px_rgba(0,229,255,0.2)] hover:shadow-[0_0_50px_rgba(0,229,255,0.4)]">
+                ACTIVATE SYSTEM
               </CyberButton>
+              <p className="text-white/20 font-mono text-[10px] uppercase tracking-widest">
+                New operators will be registered automatically
+              </p>
             </div>
-          </motion.div>
-        )}
-
-        {phase === "auth" && (
-          <motion.div 
-            key="auth"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="relative z-10 w-full max-w-lg p-12 border border-primary/30 bg-black/90 backdrop-blur-3xl rounded-none shadow-[0_0_50px_rgba(0,229,255,0.15)]"
-          >
-            <div className="mb-8 border-b border-primary/20 pb-4">
-              <h2 className="text-3xl font-display font-bold text-white tracking-[0.2em] uppercase">Identity Verification</h2>
-              <p className="text-primary/60 text-[10px] mt-2 font-mono tracking-widest uppercase">Input biometric data credentials</p>
-            </div>
-
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleAuth)} className="space-y-8">
-                <FormField
-                  control={form.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground flex items-center gap-2">
-                        <User size={12} className="text-primary" /> Callsign
-                      </FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="ALPHA-01" className="bg-black border-primary/30 focus:border-primary text-primary font-mono h-14 rounded-none tracking-widest" />
-                      </FormControl>
-                      <FormMessage className="text-[10px]" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground flex items-center gap-2">
-                        <Mail size={12} className="text-primary" /> Uplink Address
-                      </FormLabel>
-                      <FormControl>
-                        <Input {...field} type="email" placeholder="USER@KAIZEN.SYS" className="bg-black border-primary/30 focus:border-primary text-primary font-mono h-14 rounded-none tracking-widest" />
-                      </FormControl>
-                      <FormMessage className="text-[10px]" />
-                    </FormItem>
-                  )}
-                />
-                <div className="pt-4 space-y-4">
-                  <CyberButton type="submit" size="lg" className="w-full h-14 text-base">
-                    INITIALIZE NEURAL LINK
-                  </CyberButton>
-                  <button type="button" onClick={finalizeLogin} className="w-full text-[10px] text-muted-foreground hover:text-primary transition-all uppercase tracking-[0.3em] py-2">
-                    Already Synced? Access Interface
-                  </button>
-                </div>
-              </form>
-            </Form>
           </motion.div>
         )}
 
         {phase === "activating" && (
-          <motion.div 
+          <motion.div
             key="activating"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="relative z-10 w-full max-w-md p-10 border border-primary/20 bg-black/40 backdrop-blur-md"
+            className="relative z-10 w-full max-w-sm p-8 border border-primary/20 bg-black/50 backdrop-blur-md"
           >
-            <div className="space-y-6">
+            <div className="mb-4 text-[9px] font-mono text-primary/40 uppercase tracking-widest">
+              System Boot Sequence
+            </div>
+            <div className="space-y-4">
               {messages.map((msg, i) => (
-                <motion.div 
+                <motion.div
                   key={i}
-                  initial={{ opacity: 0, x: -10 }}
+                  initial={{ opacity: 0, x: -8 }}
                   animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.05 }}
                   className="text-primary font-mono text-xs flex items-center gap-3"
                 >
-                  <div className="w-1 h-3 bg-primary animate-pulse" />
+                  <div className="w-1 h-3 bg-primary shrink-0 animate-pulse" />
                   {msg}
                 </motion.div>
               ))}
+              {messages.length < systemLogs.length && (
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-3 bg-primary/40 animate-pulse" />
+                  <div className="h-1 w-24 bg-primary/20 animate-pulse rounded-full" />
+                </div>
+              )}
             </div>
           </motion.div>
         )}
 
         {phase === "access" && (
-          <motion.div 
+          <motion.div
             key="access"
-            initial={{ opacity: 0, scale: 1.1 }}
+            initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="relative z-10 text-center space-y-8"
+            className="relative z-10 text-center space-y-10"
           >
-            <div className="text-primary text-2xl tracking-[0.8em] font-black animate-pulse bg-primary/10 py-4 px-8 border border-primary/30 inline-block">
-              GATE OPEN
+            <div className="space-y-2">
+              <div className="text-primary text-sm tracking-[1em] font-mono font-black animate-pulse border border-primary/30 bg-primary/5 py-4 px-10 inline-block">
+                SYSTEM READY
+              </div>
             </div>
-            <div>
-              <CyberButton size="lg" variant="primary" onClick={finalizeLogin} className="w-80 h-16 text-xl border-white text-white hover:shadow-[0_0_50px_rgba(255,255,255,0.4)]">
-                ENTER SYSTEM
+            <div className="space-y-4">
+              <CyberButton size="lg" variant="primary" onClick={handleEnter}
+                className="w-72 h-16 text-lg">
+                ENTER KAIOS
               </CyberButton>
+              <p className="text-white/20 font-mono text-[10px] uppercase tracking-widest">
+                Authentication via Replit Identity
+              </p>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="absolute top-8 left-8 p-4 border-l-2 border-t-2 border-primary/30 w-32 h-32 pointer-events-none" />
-      <div className="absolute bottom-8 right-8 p-4 border-r-2 border-b-2 border-primary/30 w-32 h-32 pointer-events-none" />
-      
-      <div className="fixed bottom-4 left-4 text-[8px] text-primary/30 font-mono uppercase tracking-[0.5em]">System OS 1.0.4.5</div>
-      <div className="fixed bottom-4 right-4 text-[8px] text-primary/30 font-mono uppercase tracking-[0.5em]">Kaizen Protocol Active</div>
+      {/* Corner decorations */}
+      <div className="absolute top-8 left-8 w-20 h-20 border-l-2 border-t-2 border-primary/25 pointer-events-none" />
+      <div className="absolute top-8 right-8 w-20 h-20 border-r-2 border-t-2 border-primary/25 pointer-events-none" />
+      <div className="absolute bottom-8 left-8 w-20 h-20 border-l-2 border-b-2 border-primary/25 pointer-events-none" />
+      <div className="absolute bottom-8 right-8 w-20 h-20 border-r-2 border-b-2 border-primary/25 pointer-events-none" />
+
+      <div className="fixed bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-6 text-[8px] text-primary/20 font-mono uppercase tracking-[0.5em]">
+        <span>KAIOS v2.0</span>
+        <span className="w-1 h-1 bg-primary/30 rounded-full" />
+        <span>Life Operating System</span>
+      </div>
     </div>
   );
 }

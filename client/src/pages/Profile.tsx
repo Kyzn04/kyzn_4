@@ -5,73 +5,123 @@ import { useProfile } from "@/hooks/use-profile";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { insertProfileSchema } from "@shared/schema";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Save, Shield, Zap, Activity, Brain, Eye, Disc, Terminal } from "lucide-react";
-import { useEffect } from "react";
+import { Loader2, Save, Camera, CheckCircle2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useMutation } from "@tanstack/react-query";
 
-const formSchema = insertProfileSchema.pick({
-  intelligence: true,
-  strength: true,
-  charisma: true,
-  sense: true,
-  agility: true,
-  vitality: true,
-  bio: true,
-  currentClass: true,
-}).extend({
-  intelligence: z.coerce.number().min(0).max(500),
-  strength: z.coerce.number().min(0).max(500),
-  charisma: z.coerce.number().min(0).max(500),
-  sense: z.coerce.number().min(0).max(500),
-  agility: z.coerce.number().min(0).max(500),
-  vitality: z.coerce.number().min(0).max(500),
+const DEFAULT_AVATARS = [
+  `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=kaios1&backgroundColor=0d0d1a`,
+  `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=kaios2&backgroundColor=0d0d1a`,
+  `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=kaios3&backgroundColor=0d0d1a`,
+  `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=kaios4&backgroundColor=0d0d1a`,
+  `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=kaios5&backgroundColor=0d0d1a`,
+  `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=kaios6&backgroundColor=0d0d1a`,
+];
+
+const GENDERS = [
+  { value: "male", label: "MALE" },
+  { value: "female", label: "FEMALE" },
+  { value: "other", label: "OTHER" },
+  { value: "unspecified", label: "UNSPECIFIED" },
+];
+
+const identitySchema = z.object({
+  displayName: z.string().min(1, "Display name is required"),
+  username: z.string().min(3, "Minimum 3 characters").regex(/^[a-zA-Z0-9_-]+$/, "Letters, numbers, _ and - only").optional().or(z.literal("")),
+  bio: z.string().optional(),
+  gender: z.string().optional(),
+  avatarUrl: z.string().optional(),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type IdentityValues = z.infer<typeof identitySchema>;
+
+function getRank(level: number) {
+  if (level >= 121) return "S";
+  if (level >= 81) return "A";
+  if (level >= 56) return "B";
+  if (level >= 26) return "C";
+  if (level >= 11) return "D";
+  return "E";
+}
+
+const RANK_COLORS: Record<string, string> = {
+  S: "text-red-500 border-red-500 shadow-[0_0_12px_rgba(239,68,68,0.5)]",
+  A: "text-orange-400 border-orange-400",
+  B: "text-purple-400 border-purple-400",
+  C: "text-blue-400 border-blue-400",
+  D: "text-green-400 border-green-400",
+  E: "text-zinc-400 border-zinc-500",
+};
 
 export default function ProfilePage() {
-  const { profile, isLoading, updateProfile, isUpdating } = useProfile();
+  const { profile, isLoading } = useProfile();
   const { user } = useAuth();
   const { toast } = useToast();
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const [customUrlInput, setCustomUrlInput] = useState("");
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const updateMutation = useMutation({
+    mutationFn: async (data: IdentityValues) => {
+      const res = await apiRequest("PATCH", "/api/profile", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+      toast({ title: "IDENTITY SYNCHRONIZED", description: "Profile updated successfully.", className: "border-primary text-primary font-mono" });
+    },
+    onError: (err: Error) => {
+      toast({ title: "UPDATE FAILED", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const form = useForm<IdentityValues>({
+    resolver: zodResolver(identitySchema),
     defaultValues: {
-      intelligence: 10,
-      strength: 10,
-      charisma: 10,
-      sense: 10,
-      agility: 10,
-      vitality: 10,
+      displayName: "",
+      username: "",
       bio: "",
-      currentClass: "Civilian",
+      gender: "unspecified",
+      avatarUrl: "",
     },
   });
 
   useEffect(() => {
     if (profile) {
       form.reset({
-        intelligence: profile.intelligence,
-        strength: profile.strength,
-        charisma: profile.charisma,
-        sense: profile.sense,
-        agility: profile.agility,
-        vitality: profile.vitality,
+        displayName: profile.displayName || (user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : ""),
+        username: profile.username || "",
         bio: profile.bio || "",
-        currentClass: profile.currentClass,
+        gender: profile.gender || "unspecified",
+        avatarUrl: profile.avatarUrl || "",
       });
+      setAvatarPreview(profile.avatarUrl || "");
     }
-  }, [profile, form]);
+  }, [profile, form, user]);
 
-  const onSubmit = (data: FormValues) => {
-    updateProfile(data);
+  const handleAvatarSelect = (url: string) => {
+    setAvatarPreview(url);
+    form.setValue("avatarUrl", url);
+    setCustomUrlInput("");
+    setShowAvatarPicker(false);
+  };
+
+  const handleCustomUrl = () => {
+    if (customUrlInput.trim()) {
+      setAvatarPreview(customUrlInput.trim());
+      form.setValue("avatarUrl", customUrlInput.trim());
+    }
+  };
+
+  const onSubmit = (data: IdentityValues) => {
+    updateMutation.mutate({ ...data, avatarUrl: avatarPreview || data.avatarUrl });
   };
 
   if (isLoading) {
@@ -84,128 +134,164 @@ export default function ProfilePage() {
     );
   }
 
-  const hunterId = `ID-${user?.id?.toString().padStart(8, '0')}`;
+  const hunterId = `KAI-${user?.id?.toString().padStart(8, "0")}`;
   const level = profile?.level || 1;
   const experience = profile?.experience || 0;
-  
-  const getRank = (lvl: number) => {
-    if (lvl >= 100) return "S";
-    if (lvl >= 80) return "A";
-    if (lvl >= 60) return "B";
-    if (lvl >= 40) return "C";
-    if (lvl >= 20) return "D";
-    return "E";
-  };
+  const rank = getRank(level);
+  const rankColors = RANK_COLORS[rank] || RANK_COLORS.E;
+  const getNextLevelXp = (lvl: number) => Math.floor(150 * Math.pow(1.10, lvl));
+  const xpNeeded = getNextLevelXp(level);
+  const xpProgress = Math.min(100, (experience / xpNeeded) * 100);
+
+  const displayName = profile?.displayName || (user?.firstName ? `${user.firstName} ${user.lastName || ""}`.trim() : "OPERATOR");
+  const currentAvatar = avatarPreview || profile?.avatarUrl || "";
 
   return (
     <Layout>
       <div className="max-w-5xl mx-auto space-y-6 animate-in fade-in duration-500 pb-20">
-        {/* HEADER HUD SECTION */}
-        <div className="relative p-6 bg-black/60 border border-cyan-500/30 rounded-lg shadow-[0_0_20px_rgba(0,229,255,0.1)] overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-1 bg-cyan-500/20" />
+        {/* IDENTITY HEADER */}
+        <div className="relative border border-primary/30 bg-black/60 overflow-hidden p-6">
+          <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-transparent via-primary/60 to-transparent" />
+          <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-primary" />
+          <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-primary" />
+          <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-primary" />
+          <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-primary" />
+
           <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
-            {/* Portrait */}
+            {/* Avatar */}
             <div className="relative shrink-0">
-              <div className="w-40 h-40 border-2 border-cyan-400 p-1 relative">
-                <div className="absolute -top-2 -left-2 w-4 h-4 border-t-2 border-l-2 border-cyan-400" />
-                <div className="absolute -bottom-2 -right-2 w-4 h-4 border-b-2 border-r-2 border-cyan-400" />
-                <div className="w-full h-full bg-cyan-900/20 overflow-hidden relative group">
-                  <img src="/kyzn-avatar.png" alt="Hunter Portrait" className="w-full h-full object-cover grayscale brightness-110" />
-                  <div className="absolute inset-0 bg-cyan-500/10 mix-blend-screen opacity-50" />
-                  <div className="absolute inset-0 bg-[linear-gradient(transparent_0%,rgba(0,229,255,0.1)_50%,transparent_100%)] bg-[length:100%_4px] animate-scanline" />
+              <div className="w-36 h-36 border-2 border-primary/60 relative group">
+                <div className="w-full h-full bg-primary/5 overflow-hidden">
+                  {currentAvatar ? (
+                    <img src={currentAvatar} alt="Avatar" className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="font-brand text-4xl text-primary/40">{displayName?.[0]?.toUpperCase()}</span>
+                    </div>
+                  )}
                 </div>
+                <button
+                  onClick={() => setShowAvatarPicker(!showAvatarPicker)}
+                  className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-primary"
+                >
+                  <Camera className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="text-[8px] font-mono text-primary/40 text-center mt-1 uppercase tracking-widest">
+                Hover to change
               </div>
             </div>
 
-            {/* Profile Info */}
-            <div className="flex-1 space-y-4 w-full text-center md:text-left">
+            {/* Info */}
+            <div className="flex-1 w-full text-center md:text-left space-y-4">
               <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                  <h1 className="text-4xl font-display font-black text-white tracking-widest uppercase">{user?.firstName} {user?.lastName}</h1>
-                  <p className="font-mono text-cyan-400/80 text-sm mt-1 tracking-tighter">ID: {hunterId}</p>
+                  <h1 className="text-4xl font-brand text-white tracking-widest uppercase leading-tight">{displayName}</h1>
+                  {profile?.username && (
+                    <p className="font-mono text-primary/60 text-sm mt-0.5">@{profile.username}</p>
+                  )}
+                  <p className="font-mono text-primary/30 text-xs mt-0.5 tracking-widest">ID: {hunterId}</p>
                 </div>
-                <div className="text-center md:text-right">
-                  <div className="text-[10px] font-mono text-cyan-500/60 uppercase tracking-widest">Hunter Rank</div>
-                  <div className="text-5xl font-display font-black text-cyan-400 drop-shadow-[0_0_8px_rgba(0,229,255,0.6)]">{getRank(level)}</div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[10px] font-mono text-cyan-400/80 uppercase">
-                    <span>XP (Progress)</span>
-                    <span>{experience % 100} / 100</span>
-                  </div>
-                  <div className="h-3 bg-cyan-950/40 border border-cyan-500/20 rounded-full overflow-hidden p-[1px]">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: `${experience % 100}%` }}
-                      className="h-full bg-gradient-to-r from-cyan-600 to-cyan-400 shadow-[0_0_10px_rgba(0,229,255,0.4)]"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-1">
-                  <div className="flex justify-between text-[10px] font-mono text-cyan-400/80 uppercase">
-                    <span>Level</span>
-                    <span>{level}</span>
-                  </div>
-                  <div className="h-3 bg-cyan-950/40 border border-cyan-500/20 rounded-full overflow-hidden p-[1px]">
-                    <motion.div 
-                      initial={{ width: 0 }}
-                      animate={{ width: "100%" }}
-                      className="h-full bg-gradient-to-r from-cyan-800 to-cyan-600 shadow-[0_0_10px_rgba(0,229,255,0.2)]"
-                    />
-                  </div>
+                <div className={`border-2 w-16 h-16 flex items-center justify-center font-brand text-3xl mx-auto md:mx-0 ${rankColors}`}>
+                  {rank}
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-6 pt-2 justify-center md:justify-start">
+              {/* XP bar */}
+              <div className="max-w-md">
+                <div className="flex justify-between text-[10px] font-mono text-primary/60 uppercase mb-1">
+                  <span>Level {level}</span>
+                  <span>{experience} / {xpNeeded} XP</span>
+                </div>
+                <div className="h-2 bg-primary/5 border border-primary/20 overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${xpProgress}%` }}
+                    transition={{ duration: 1, ease: "easeOut" }}
+                    className="h-full bg-primary shadow-[0_0_8px_rgba(0,229,255,0.5)]"
+                  />
+                </div>
+              </div>
+
+              {/* Badges */}
+              <div className="flex flex-wrap gap-4 justify-center md:justify-start text-sm">
                 <div>
-                  <div className="text-[10px] font-mono text-cyan-500/60 uppercase">Guild</div>
-                  <div className="text-white font-display text-sm uppercase">N/A</div>
+                  <div className="text-[9px] font-mono text-primary/40 uppercase tracking-widest">Class</div>
+                  <div className="font-display text-primary text-xs uppercase tracking-wide">{profile?.currentClass}</div>
                 </div>
                 <div>
-                  <div className="text-[10px] font-mono text-cyan-500/60 uppercase">Class</div>
-                  <div className="text-white font-display text-sm uppercase">{profile?.currentClass}</div>
+                  <div className="text-[9px] font-mono text-primary/40 uppercase tracking-widest">Title</div>
+                  <div className="font-display text-white text-xs uppercase tracking-wide">{profile?.currentTitle}</div>
                 </div>
-                <div>
-                  <div className="text-[10px] font-mono text-cyan-500/60 uppercase">Title</div>
-                  <div className="text-white font-display text-sm uppercase">{profile?.currentTitle}</div>
-                </div>
+                {profile?.gender && profile.gender !== "unspecified" && (
+                  <div>
+                    <div className="text-[9px] font-mono text-primary/40 uppercase tracking-widest">Gender</div>
+                    <div className="font-display text-white/60 text-xs uppercase">{profile.gender}</div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* STATS PANEL */}
-          <div className="lg:col-span-2 space-y-6">
-            <CyberCard title="ATTRIBUTES" variant="neon" className="border-cyan-500/30">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                    <AttributeRow form={form} name="strength" label="Strength" icon={<Shield className="w-4 h-4" />} color="text-cyan-400" />
-                    <AttributeRow form={form} name="agility" label="Agility" icon={<Zap className="w-4 h-4" />} color="text-cyan-400" />
-                    <AttributeRow form={form} name="vitality" label="Vitality" icon={<Activity className="w-4 h-4" />} color="text-cyan-400" />
-                    <AttributeRow form={form} name="intelligence" label="Intelligence" icon={<Brain className="w-4 h-4" />} color="text-cyan-400" />
-                    <AttributeRow form={form} name="sense" label="Perception" icon={<Eye className="w-4 h-4" />} color="text-cyan-400" />
-                    <AttributeRow form={form} name="charisma" label="Mana Control" icon={<Disc className="w-4 h-4" />} color="text-cyan-400" />
-                  </div>
+        {/* Avatar Picker (expandable) */}
+        {showAvatarPicker && (
+          <CyberCard className="p-5">
+            <h3 className="text-[10px] font-mono text-primary/60 uppercase tracking-widest mb-4">Select Profile Image</h3>
+            <div className="grid grid-cols-6 gap-3 mb-4">
+              {DEFAULT_AVATARS.map((url, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleAvatarSelect(url)}
+                  className={`aspect-square border-2 overflow-hidden transition-all ${
+                    currentAvatar === url ? "border-primary shadow-[0_0_8px_rgba(0,229,255,0.4)]" : "border-white/10 hover:border-primary/40"
+                  }`}
+                >
+                  <img src={url} alt={`Avatar ${i + 1}`} className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={customUrlInput}
+                onChange={(e) => setCustomUrlInput(e.target.value)}
+                placeholder="Paste custom image URL..."
+                className="bg-black border-primary/20 text-white font-mono text-xs h-10"
+              />
+              <CyberButton size="sm" onClick={handleCustomUrl} variant="secondary">Apply</CyberButton>
+            </div>
+          </CyberCard>
+        )}
 
-                  <div className="pt-6 border-t border-cyan-500/10">
-                    <h4 className="text-[10px] font-mono text-cyan-500/60 uppercase mb-4 tracking-widest">Biometric Log (BIO)</h4>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Identity Form */}
+          <div className="lg:col-span-2">
+            <CyberCard title="IDENTITY CONFIGURATION" variant="neon">
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <FormField
                       control={form.control}
-                      name="bio"
+                      name="displayName"
                       render={({ field }) => (
                         <FormItem>
+                          <FormLabel className="text-[10px] font-mono uppercase tracking-widest text-primary/60">Display Name</FormLabel>
                           <FormControl>
-                            <Textarea 
-                              {...field} 
-                              value={field.value || ""} 
-                              className="bg-black/40 border-cyan-500/20 text-cyan-100 font-mono resize-none focus:border-cyan-400" 
-                              placeholder="Awaiting system log entry..." 
-                            />
+                            <Input {...field} className="bg-black/40 border-primary/20 text-white font-mono h-11 focus:border-primary rounded-none" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="username"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-[10px] font-mono uppercase tracking-widest text-primary/60">Callsign (Username)</FormLabel>
+                          <FormControl>
+                            <Input {...field} className="bg-black/40 border-primary/20 text-primary font-mono h-11 focus:border-primary rounded-none uppercase tracking-widest" />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -213,97 +299,111 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  <div className="flex justify-end gap-4">
-                    <CyberButton type="submit" isLoading={isUpdating} className="w-full md:w-auto bg-cyan-500/10 border-cyan-500 text-cyan-400 hover:bg-cyan-500">
-                      <Save className="w-4 h-4 mr-2" />
-                      SYNCHRONIZE SYSTEM
-                    </CyberButton>
-                  </div>
+                  {/* Gender */}
+                  <FormField
+                    control={form.control}
+                    name="gender"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-mono uppercase tracking-widest text-primary/60">Gender</FormLabel>
+                        <div className="grid grid-cols-4 gap-2">
+                          {GENDERS.map((g) => (
+                            <button
+                              key={g.value}
+                              type="button"
+                              onClick={() => field.onChange(g.value)}
+                              className={`py-2.5 border text-[10px] font-mono uppercase tracking-wide transition-all ${
+                                field.value === g.value
+                                  ? "border-primary text-primary bg-primary/10"
+                                  : "border-white/10 text-white/30 hover:border-primary/30 hover:text-white/50"
+                              }`}
+                            >
+                              {g.label}
+                            </button>
+                          ))}
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Bio */}
+                  <FormField
+                    control={form.control}
+                    name="bio"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-mono uppercase tracking-widest text-primary/60">System Log (Bio)</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            {...field}
+                            value={field.value || ""}
+                            className="bg-black/40 border-primary/20 text-primary/80 font-mono resize-none focus:border-primary rounded-none"
+                            placeholder="Awaiting operator log entry..."
+                            rows={4}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  <CyberButton type="submit" isLoading={updateMutation.isPending} className="w-full md:w-auto">
+                    <Save className="w-4 h-4 mr-2" />
+                    SYNCHRONIZE IDENTITY
+                  </CyberButton>
                 </form>
               </Form>
             </CyberCard>
-
-            {/* EQUIPMENT PANEL */}
-            <CyberCard title="EQUIPMENT EFFECTS" className="border-cyan-500/20 bg-black/40">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <EquipmentItem label="Ring" effect="+Strength" />
-                <EquipmentItem label="Bracelet" effect="+Mana Control" />
-                <EquipmentItem label="Armor" effect="+Vitality" />
-              </div>
-            </CyberCard>
           </div>
 
-          {/* SKILLS PANEL */}
-          <div className="space-y-6">
-            <CyberCard title="SKILLS & TRAITS" variant="neon" className="border-cyan-500/30 h-full">
-              <div className="space-y-4">
-                <SkillItem rank="F" type="Active" name="Resource Collection" unlocked />
-                <SkillItem rank="E" type="Passive" name="Latent Awakening" unlocked />
-                <SkillItem rank="S" type="Active" name="Monarch's Tempest" />
-                <SkillItem rank="S" type="Hidden" name="Evolution Authority" />
-                <SkillItem rank="?" type="Unknown" name="[DATA ENCRYPTED]" />
+          {/* Stats Summary */}
+          <div className="space-y-4">
+            <CyberCard title="CORE STATS" variant="neon">
+              <div className="space-y-3">
+                {[
+                  { label: "INT", value: profile?.intelligence || 0, color: "text-cyan-400" },
+                  { label: "STR", value: profile?.strength || 0, color: "text-red-400" },
+                  { label: "CHA", value: profile?.charisma || 0, color: "text-yellow-400" },
+                  { label: "SEN", value: profile?.sense || 0, color: "text-pink-400" },
+                  { label: "AGI", value: profile?.agility || 0, color: "text-green-400" },
+                  { label: "VIT", value: profile?.vitality || 0, color: "text-orange-400" },
+                ].map(stat => (
+                  <div key={stat.label} className="flex items-center justify-between">
+                    <span className={`text-[10px] font-mono font-bold uppercase ${stat.color}`}>{stat.label}</span>
+                    <div className="flex-1 mx-3 h-1 bg-white/5 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${stat.color.replace("text-", "bg-")}/60`}
+                        style={{ width: `${Math.min(100, (stat.value / 500) * 100)}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] font-mono text-white/40 w-8 text-right">{stat.value}</span>
+                  </div>
+                ))}
+              </div>
+            </CyberCard>
+
+            <CyberCard className="p-4">
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-mono text-muted-foreground uppercase">Merit Points</span>
+                  <span className="text-accent font-bold">{profile?.disciplinePoints || 0}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-mono text-muted-foreground uppercase">Streak</span>
+                  <span className="text-orange-400 font-bold">{profile?.disciplineStreak || 0}d</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-mono text-muted-foreground uppercase">Z-Coins</span>
+                  <span className="text-yellow-500 font-bold">{profile?.zCoins || 0} ZC</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-[10px] font-mono text-muted-foreground uppercase">Favor</span>
+                  <span className="text-yellow-300 font-bold">{profile?.favorPoints || 0}</span>
+                </div>
               </div>
             </CyberCard>
           </div>
         </div>
       </div>
     </Layout>
-  );
-}
-
-function AttributeRow({ form, name, label, icon, color }: any) {
-  const value = form.watch(name);
-  return (
-    <FormField
-      control={form.control}
-      name={name}
-      render={({ field }) => (
-        <FormItem className="space-y-1">
-          <div className="flex items-center justify-between">
-            <FormLabel className={cn("text-xs font-mono uppercase tracking-widest flex items-center gap-2", color)}>
-              {icon} {label}
-            </FormLabel>
-            <span className="text-[10px] font-mono text-cyan-500/40">BASE: {value}</span>
-          </div>
-          <FormControl>
-            <div className="relative group">
-              <Input type="number" {...field} className="bg-cyan-950/20 border-cyan-500/20 text-white font-mono h-9 focus:border-cyan-400 transition-colors" />
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-mono text-cyan-400">+0</div>
-            </div>
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
-    />
-  );
-}
-
-function EquipmentItem({ label, effect }: { label: string, effect: string }) {
-  return (
-    <div className="p-3 border border-cyan-500/10 bg-cyan-950/10 rounded">
-      <div className="text-[10px] font-mono text-cyan-500/60 uppercase">{label}</div>
-      <div className="text-xs font-display text-cyan-400">{effect}</div>
-    </div>
-  );
-}
-
-function SkillItem({ rank, type, name, unlocked = false }: { rank: string, type: string, name: string, unlocked?: boolean }) {
-  return (
-    <div className={cn(
-      "p-3 border-l-2 flex items-center gap-4 transition-all",
-      unlocked ? "border-cyan-400 bg-cyan-500/5" : "border-white/10 opacity-40 bg-white/5 grayscale"
-    )}>
-      <div className={cn(
-        "w-10 h-10 shrink-0 flex items-center justify-center font-display font-black text-xl border-2",
-        rank === 'S' ? "text-yellow-400 border-yellow-400/50" : "text-cyan-400 border-cyan-400/50"
-      )}>
-        {rank}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-[8px] font-mono text-cyan-500/60 uppercase tracking-widest">{type}</div>
-        <div className="text-sm font-display text-white truncate uppercase tracking-tight">{name}</div>
-      </div>
-      {!unlocked && <Terminal className="w-4 h-4 text-white/20" />}
-    </div>
   );
 }

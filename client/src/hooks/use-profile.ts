@@ -12,7 +12,7 @@ export function useProfile() {
     queryKey: [api.profile.get.path],
     queryFn: async () => {
       const res = await fetch(api.profile.get.path, { credentials: "include" });
-      if (res.status === 404) return null;
+      if (res.status === 404 || res.status === 401) return null;
       if (!res.ok) throw new Error("Failed to fetch profile");
       return api.profile.get.responses[200].parse(await res.json());
     },

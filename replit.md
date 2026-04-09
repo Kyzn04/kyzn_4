@@ -1,10 +1,18 @@
-# KYZN - Solo Leveling Inspired Productivity System
+# KAIOS - Life Operating System
 
 ## Overview
 
-KYZN is a gamified productivity application inspired by "Solo Leveling" anime/manga aesthetics. It transforms personal development into an RPG-like experience with character stats, skill trees, daily quests, and evolution mechanics. Users level up by improving core attributes (STR, AGI, INT, VIT, SEN, CHA) and completing real-world tasks tracked through the Kaizen Hexagon system.
+KAIOS (Life Operating System) is a gamified personal development application inspired by Solo Leveling aesthetics and advanced system interfaces. It transforms personal growth into an RPG-like experience with character stats, skill trees, daily quests, and evolution mechanics. Users level up by improving core attributes (STR, AGI, INT, VIT, SEN, CHA) and completing real-world tasks.
 
-The application features a cyberpunk-themed UI with neon colors, radar charts for stat visualization, and a progression system where users evolve through class titles (e.g., "Novice Tinkerer" → "Iron Monarch") based on accumulated stats.
+The application features a cyberpunk-themed UI with Azonix branding font, neon cyan palette, radar charts for stat visualization, and a rank-based progression system (E→S). Each user account is fully independent with separate progression, stats, achievements, and history.
+
+## Branding
+
+- App name: **KAIOS** (formerly KYZN)
+- Brand font: **Azonix** (via fonts.cdnfonts.com), falls back to Orbitron
+- Display font: **Orbitron** for UI headers
+- Body font: **Rajdhani**
+- Mono font: **Share Tech Mono**
 
 ## User Preferences
 
@@ -40,9 +48,16 @@ Preferred communication style: Simple, everyday language.
 - **Session Management**: express-session with passport.js
 
 ### Key Data Models
-- **Profiles**: Core stats (INT, STR, CHA, SEN, AGI, VIT), Kaizen stats, HP/MP, quest progress, titles/classes
+- **Profiles**: Core stats (INT, STR, CHA, SEN, AGI, VIT), Kaizen stats, HP/MP, quest progress, titles/classes, identity fields (username, displayName, gender, avatarUrl, onboardingComplete)
 - **Skills**: Tree structure with parent relationships, stat requirements, categories (Engineering Authority, Sovereign Leader, etc.)
 - **UserSkills**: Junction table tracking unlocked skills per user
+
+### Identity & Onboarding System
+- New users go through a 3-step onboarding wizard (callsign/username, avatar selection, gender classification)
+- `onboardingComplete` flag gates access to the main app
+- Each account is fully isolated — separate stats, quest history, skills, and progression
+- Avatar system: 6 default DiceBear bot avatars + custom URL input
+- Titles evolve automatically based on dominant stat rank (cannot be manually edited)
 
 ### Evolution System
 Stats automatically trigger title/class evolution based on the dominant stat and its E→S rank. The rank-based title system maps each stat category to 6 titles (E through S rank). Thresholds: E(1-10), D(11-25), C(26-55), B(56-80), A(81-120), S(121+). Logic lives in `server/routes.ts` and `server/storage.ts`.
