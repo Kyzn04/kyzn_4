@@ -238,6 +238,57 @@ export async function registerRoutes(
     }
   });
 
+  app.post("/api/profile/reset-quests", async (req: any, res) => {
+    if (!req.isAuthenticated()) return res.status(401).send();
+    const userId = req.user.claims.sub;
+
+    try {
+      const profile = await storage.getProfile(userId);
+      if (!profile) return res.status(404).json({ message: "Profile not found" });
+
+      // Save transcript before resetting
+      const { db } = await import("./db");
+      const { dailyTranscripts } = await import("@shared/schema");
+      const questProgress = profile.questProgress as Record<string, number>;
+      const completedTasks = Object.values(questProgress).filter(v => typeof v === 'number' && v >= 1).length;
+      const isDisciplined = completedTasks >= 6;
+
+      await db.insert(dailyTranscripts).values({
+        userId,
+        date: new Date(),
+        questSnapshot: questProgress,
+        tasksCompleted: completedTasks,
+        isDisciplined,
+      });
+
+      // Update streaks based on today's performance
+      const streakUpdate: any = {};
+      if (isDisciplined) {
+        const newStreak = (profile.disciplineStreak || 0) + 1;
+        streakUpdate.disciplineStreak = newStreak;
+        streakUpdate.totalDisciplinedDays = (profile.totalDisciplinedDays || 0) + 1;
+        streakUpdate.longestStreak = Math.max(profile.longestStreak || 0, newStreak);
+      } else {
+        streakUpdate.disciplineStreak = 0;
+      }
+
+      // Reset quests
+      const updated = await storage.updateProfile(userId, {
+        ...streakUpdate,
+        rewardClaimedToday: false,
+        questProgress: {
+          flow: 0, push: 0, sit: 0, squat: 0,
+          bible: 0, book: 0, meals: 0,
+          meditation: 0, journaling: 0, creation: 0
+        }
+      });
+
+      res.json(updated);
+    } catch (err: any) {
+      res.status(400).json({ message: err.message });
+    }
+  });
+
   app.get("/api/profile/transcripts", async (req: any, res) => {
     if (!req.isAuthenticated()) return res.status(401).send();
     const userId = req.user.claims.sub;

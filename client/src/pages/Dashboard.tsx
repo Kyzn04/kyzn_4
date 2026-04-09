@@ -4,7 +4,7 @@ import { CyberCard } from "@/components/ui/CyberCard";
 import { StatRadar } from "@/components/dashboard/StatRadar";
 import { CyberButton } from "@/components/ui/CyberButton";
 import { Link, useLocation } from "wouter";
-import { Activity, Zap, Shield, Brain, Trophy, Loader2, Plus, CheckCircle2, Info, Flame, AlertTriangle, FastForward } from "lucide-react";
+import { Activity, Zap, Shield, Brain, Trophy, Loader2, Plus, CheckCircle2, Info, Flame, AlertTriangle, FastForward, RotateCcw } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Slider } from "@/components/ui/slider";
 import { useMutation } from "@tanstack/react-query";
@@ -49,6 +49,16 @@ export default function Dashboard() {
   const claimRecoveryMutation = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/profile/claim-recovery");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+    }
+  });
+
+  const resetQuestsMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/profile/reset-quests");
       return res.json();
     },
     onSuccess: () => {
@@ -263,8 +273,21 @@ export default function Dashboard() {
 
           {/* Daily Quest Section */}
           <CyberCard title="DAILY QUEST" variant="neon" className="relative">
-            <div className="absolute top-4 right-4 text-cyan-500/50">
-              <span className="text-[10px] font-mono uppercase tracking-widest">{completedCount}/10 TASKS</span>
+            <div className="absolute top-4 right-4 flex items-center gap-3">
+              <span className="text-[10px] font-mono text-cyan-500/50 uppercase tracking-widest">{completedCount}/10 TASKS</span>
+              <button
+                onClick={() => {
+                  if (window.confirm("End today's session and reset all quests? Progress will be logged to your transcript.")) {
+                    resetQuestsMutation.mutate();
+                  }
+                }}
+                disabled={resetQuestsMutation.isPending}
+                title="New Day — log transcript & reset quests"
+                className="flex items-center gap-1 px-2 py-1 border border-white/10 text-white/30 hover:border-red-500/50 hover:text-red-400 rounded text-[9px] font-mono uppercase tracking-tighter transition-all"
+              >
+                <RotateCcw size={9} />
+                NEW DAY
+              </button>
             </div>
             
             {!isSafe && (
